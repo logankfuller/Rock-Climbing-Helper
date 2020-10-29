@@ -1,7 +1,7 @@
 let img; let poseNet; let poses = [];
 function setup() {
-    createCanvas(360, 640);
-    img = createImg('data/model.jpg', imageReady);
+    createCanvas(515, 720);
+    img = createImg('data/route.jpg', imageReady);
     img.size(width, height);
 
     img.hide(); // hide the image in the browser
@@ -22,14 +22,6 @@ function imageReady(){
     poseNet.on('pose', function (results) {
         poses = results;
         console.log(poses)
-        let leftLegX = poses[0].pose.leftAnkle.x - poses[0].pose.leftHip.x;
-        let leftLegY = poses[0].pose.leftAnkle.y - poses[0].pose.leftHip.y;
-        
-        let rightLegX = poses[0].pose.rightAnkle.x - poses[0].pose.rightHip.x;
-        let rightLegY = poses[0].pose.rightAnkle.y - poses[0].pose.rightHip.y;
-
-        document.getElementById('left_leg').innerHTML = "Left Leg Length: " + Math.sqrt(Math.abs(Math.pow(leftLegX, 2) + Math.pow(leftLegY, 2)))
-        document.getElementById('right_leg').innerHTML = "Right Leg Length: " + Math.sqrt(Math.abs(Math.pow(rightLegX, 2) + Math.pow(rightLegY, 2)))
     });
 }
 // when poseNet is ready, do the detection
@@ -45,9 +37,10 @@ function modelReady() {
 function draw() {
     if (poses.length > 0) {
         image(img, 0, 0, width, height);
+        initCanvas();
         drawSkeleton(poses);
         drawKeypoints(poses);
-        drawStickman();
+        //drawStickman();
         noLoop(); // stop looping when the poses are estimated
     }
 }
@@ -86,65 +79,198 @@ function drawSkeleton() {
     }
 }
 
-function drawStickman() {
-    console.log('hello')
-    var canvas = this.__canvas = new fabric.Canvas('c', { selection: false });
-    fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
-  
-    function makeCircle(left, top, line1, line2, line3, line4) {
-      var c = new fabric.Circle({
-        left: left,
-        top: top,
-        strokeWidth: 5,
-        radius: 12,
-        fill: '#fff',
-        stroke: '#666'
-      });
-      c.hasControls = c.hasBorders = false;
-  
-      c.line1 = line1;
-      c.line2 = line2;
-      c.line3 = line3;
-      c.line4 = line4;
-  
-      return c;
-    }
-  
-    function makeLine(coords) {
-      return new fabric.Line(coords, {
-        fill: 'red',
+function initCanvas() {
+    let width = 515
+    let height = 720
+
+    let stage = new Konva.Stage({
+        container: 'container',
+        width,
+        height
+    });
+
+    let layer = new Konva.Layer()
+
+    let leftLowerLeg = new Konva.Line({
+        points: [poses[0].pose.leftAnkle.x, poses[0].pose.leftAnkle.y, poses[0].pose.leftKnee.x, poses[0].pose.leftKnee.y],
         stroke: 'red',
         strokeWidth: 5,
-        selectable: false,
-        evented: false,
-      });
-    }
-  
-    var line = makeLine([ 250, 125, 250, 175 ]),
-        line2 = makeLine([ 250, 175, 250, 250 ]),
-        line3 = makeLine([ 250, 250, 300, 350]),
-        line4 = makeLine([ 250, 250, 200, 350]),
-        line5 = makeLine([ 250, 175, 175, 225 ]),
-        line6 = makeLine([ 250, 175, 325, 225 ]);
-  
-    canvas.add(line, line2, line3, line4, line5, line6);
-  
-    canvas.add(
-      makeCircle(line.get('x1'), line.get('y1'), null, line),
-      makeCircle(line.get('x2'), line.get('y2'), line, line2, line5, line6),
-      makeCircle(line2.get('x2'), line2.get('y2'), line2, line3, line4),
-      makeCircle(line3.get('x2'), line3.get('y2'), line3),
-      makeCircle(line4.get('x2'), line4.get('y2'), line4),
-      makeCircle(line5.get('x2'), line5.get('y2'), line5),
-      makeCircle(line6.get('x2'), line6.get('y2'), line6)
-    );
-  
-    canvas.on('object:moving', function(e) {
-      var p = e.target;
-      p.line1 && p.line1.set({ 'x2': p.left, 'y2': p.top });
-      p.line2 && p.line2.set({ 'x1': p.left, 'y1': p.top });
-      p.line3 && p.line3.set({ 'x1': p.left, 'y1': p.top });
-      p.line4 && p.line4.set({ 'x1': p.left, 'y1': p.top });
-      canvas.renderAll();
+    })
+
+    let leftUpperLeg = new Konva.Line({
+        points: [poses[0].pose.leftKnee.x, poses[0].pose.leftKnee.y, poses[0].pose.leftHip.x, poses[0].pose.leftHip.y],
+        stroke: 'green',
+        strokeWidth: 5,
+    })
+
+    let leftAnkleAnchor = new Konva.Circle({
+        x: poses[0].pose.leftAnkle.x,
+        y: poses[0].pose.leftAnkle.y,
+        radius: 10,
+        stroke: '#666',
+        fill: '#ddd',
+        strokeWidth: 2,
+        draggable: true,
+    })
+
+    leftAnkleAnchor.on('dragmove', function() {
+        leftLowerLeg.points([
+            leftAnkleAnchor.x(), 
+            leftAnkleAnchor.y(), 
+            leftKneeAnchor.x(), 
+            leftKneeAnchor.y()
+        ])
+    })
+
+    let leftKneeAnchor = new Konva.Circle({
+        x: poses[0].pose.leftKnee.x,
+        y: poses[0].pose.leftKnee.y,
+        radius: 10,
+        stroke: '#666',
+        fill: '#ddd',
+        strokeWidth: 2,
+        draggable: true,
+    })
+
+    leftKneeAnchor.on('dragmove', function() {
+        leftUpperLeg.points([
+            leftKneeAnchor.x(), 
+            leftKneeAnchor.y(), 
+            leftHipAnchor.x(), 
+            leftHipAnchor.y()
+        ])
+
+        leftLowerLeg.points([
+            leftAnkleAnchor.x(),
+            leftAnkleAnchor.y(),
+            leftKneeAnchor.x(),
+            leftKneeAnchor.y()
+        ])
+    })
+
+    let leftHipAnchor = new Konva.Circle({
+        x: poses[0].pose.leftHip.x,
+        y: poses[0].pose.leftHip.y,
+        radius: 10,
+        stroke: '#666',
+        fill: '#ddd',
+        strokeWidth: 2,
+        //draggable: true,
+    })
+
+
+
+
+
+
+
+
+
+
+    let leftForearm = new Konva.Line({
+        points: [poses[0].pose.leftWrist.x, poses[0].pose.leftWrist.y, poses[0].pose.leftElbow.x, poses[0].pose.leftElbow.y],
+        stroke: 'blue',
+        strokeWidth: 5,
+    })
+
+    let leftUpperArm = new Konva.Line({
+        points: [poses[0].pose.leftElbow.x, poses[0].pose.leftElbow.y, poses[0].pose.leftShoulder.x, poses[0].pose.leftShoulder.y],
+        stroke: 'red',
+        strokeWidth: 5,
+    })
+
+    let leftWristAnchor = new Konva.Circle({
+        x: poses[0].pose.leftWrist.x,
+        y: poses[0].pose.leftWrist.y,
+        radius: 10,
+        stroke: '#666',
+        fill: '#ddd',
+        strokeWidth: 2,
+        draggable: true,
+    })
+
+    leftWristAnchor.on('dragmove', function() {
+        leftForearm.points([
+            leftWristAnchor.x(), 
+            leftWristAnchor.y(), 
+            leftElbowAnchor.x(), 
+            leftElbowAnchor.y()
+        ])
     });
-  }
+
+    let leftElbowAnchor = new Konva.Circle({
+        x: poses[0].pose.leftElbow.x,
+        y: poses[0].pose.leftElbow.y,
+        radius: 10,
+        stroke: '#666',
+        fill: '#ddd',
+        strokeWidth: 2,
+        draggable: true,
+    })
+
+    leftElbowAnchor.on('dragmove', function() {
+        leftForearm.points([
+            leftWristAnchor.x(), 
+            leftWristAnchor.y(), 
+            leftElbowAnchor.x(), 
+            leftElbowAnchor.y()
+        ])
+
+        leftUpperArm.points([
+            leftElbowAnchor.x(),
+            leftElbowAnchor.y(),
+            leftShoulderAnchor.x(),
+            leftShoulderAnchor.y()
+        ])
+    });
+
+    let leftShoulderAnchor = new Konva.Circle({
+        x: poses[0].pose.leftShoulder.x,
+        y: poses[0].pose.leftShoulder.y,
+        radius: 10,
+        stroke: '#666',
+        fill: '#ddd',
+        strokeWidth: 2,
+        //draggable: true,
+    })
+
+    layer.add(leftAnkleAnchor)
+    layer.add(leftKneeAnchor)
+    layer.add(leftHipAnchor)
+    layer.add(leftLowerLeg)
+    layer.add(leftUpperLeg)
+
+    layer.add(leftElbowAnchor)
+    layer.add(leftShoulderAnchor)
+    layer.add(leftWristAnchor)
+    layer.add(leftForearm)
+    layer.add(leftUpperArm)
+    stage.add(layer)
+}
+
+// function drawStickman() {
+//     var canvas = this.__canvas = new fabric.Canvas('c', { selection: false });
+//     fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
+    
+//     function makeLine(coords) {
+//       return new fabric.Line(coords, {
+//         fill: 'red',
+//         stroke: 'red',
+//         strokeWidth: 5,
+//         selectable: false,
+//         evented: false,
+//       });
+//     }
+
+//     // poses[0].pose.leftAnkle.x
+  
+//     // Hmm, how to convert coordinates from exact coordinate to corner coordinates?
+//     // 0,0            100,0
+//     //
+//     //                               ---> 30,50 = +30 on x, -50 from top of y-axis
+//     //
+//     // 0,100          100,100
+//     var leftLowerLeg = makeLine([ 250, 175, 250, 250 ]);
+  
+//     canvas.add(leftLowerLeg);
+//   }
