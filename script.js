@@ -91,6 +91,8 @@ function initCanvas() {
 
     let layer = new Konva.Layer()
 
+    let bodyGroup = new Konva.Group();
+
     let leftLowerLeg = new Konva.Line({
         points: [poses[0].pose.leftAnkle.x, poses[0].pose.leftAnkle.y, poses[0].pose.leftKnee.x, poses[0].pose.leftKnee.y],
         stroke: 'red',
@@ -157,6 +159,86 @@ function initCanvas() {
         strokeWidth: 2,
         //draggable: true,
     })
+
+
+
+
+
+
+
+
+
+
+
+
+    let rightLowerLeg = new Konva.Line({
+        points: [poses[0].pose.rightAnkle.x, poses[0].pose.rightAnkle.y, poses[0].pose.rightKnee.x, poses[0].pose.rightKnee.y],
+        stroke: 'red',
+        strokeWidth: 5,
+    })
+
+    let rightUpperLeg = new Konva.Line({
+        points: [poses[0].pose.rightKnee.x, poses[0].pose.rightKnee.y, poses[0].pose.rightHip.x, poses[0].pose.rightHip.y],
+        stroke: 'green',
+        strokeWidth: 5,
+    })
+
+    let rightAnkleAnchor = new Konva.Circle({
+        x: poses[0].pose.rightAnkle.x,
+        y: poses[0].pose.rightAnkle.y,
+        radius: 10,
+        stroke: '#666',
+        fill: '#ddd',
+        strokeWidth: 2,
+        draggable: true,
+    })
+
+    rightAnkleAnchor.on('dragmove', function() {
+        rightLowerLeg.points([
+            rightAnkleAnchor.x(), 
+            rightAnkleAnchor.y(), 
+            rightKneeAnchor.x(), 
+            rightKneeAnchor.y()
+        ])
+    })
+
+    let rightKneeAnchor = new Konva.Circle({
+        x: poses[0].pose.rightKnee.x,
+        y: poses[0].pose.rightKnee.y,
+        radius: 10,
+        stroke: '#666',
+        fill: '#ddd',
+        strokeWidth: 2,
+        draggable: true,
+    })
+
+    rightKneeAnchor.on('dragmove', function() {
+        rightUpperLeg.points([
+            rightKneeAnchor.x(), 
+            rightKneeAnchor.y(), 
+            rightHipAnchor.x(), 
+            rightHipAnchor.y()
+        ])
+
+        rightLowerLeg.points([
+            rightAnkleAnchor.x(),
+            rightAnkleAnchor.y(),
+            rightKneeAnchor.x(),
+            rightKneeAnchor.y()
+        ])
+    })
+
+    let rightHipAnchor = new Konva.Circle({
+        x: poses[0].pose.rightHip.x,
+        y: poses[0].pose.rightHip.y,
+        radius: 10,
+        stroke: '#666',
+        fill: '#ddd',
+        strokeWidth: 2,
+        //draggable: true,
+    })
+
+
 
 
 
@@ -234,6 +316,111 @@ function initCanvas() {
         //draggable: true,
     })
 
+
+
+    let rightForearm = new Konva.Line({
+        points: [poses[0].pose.rightWrist.x, poses[0].pose.rightWrist.y, poses[0].pose.rightElbow.x, poses[0].pose.rightElbow.y],
+        stroke: 'blue',
+        strokeWidth: 5,
+    })
+
+    let rightUpperArm = new Konva.Line({
+        points: [poses[0].pose.rightElbow.x, poses[0].pose.rightElbow.y, poses[0].pose.rightShoulder.x, poses[0].pose.rightShoulder.y],
+        stroke: 'red',
+        strokeWidth: 5,
+    })
+
+    let rightWristAnchor = new Konva.Circle({
+        x: poses[0].pose.rightWrist.x,
+        y: poses[0].pose.rightWrist.y,
+        radius: 10,
+        stroke: '#666',
+        fill: '#ddd',
+        strokeWidth: 2,
+        draggable: true,
+    })
+
+    rightWristAnchor.on('dragmove', function() {
+        rightForearm.points([
+            rightWristAnchor.x(), 
+            rightWristAnchor.y(), 
+            rightElbowAnchor.x(), 
+            rightElbowAnchor.y()
+        ])
+    });
+
+    let rightElbowAnchor = new Konva.Circle({
+        x: poses[0].pose.rightElbow.x,
+        y: poses[0].pose.rightElbow.y,
+        radius: 10,
+        stroke: '#666',
+        fill: '#ddd',
+        strokeWidth: 2,
+        draggable: true,
+    })
+
+    rightElbowAnchor.on('dragmove', function() {
+        rightForearm.points([
+            rightWristAnchor.x(), 
+            rightWristAnchor.y(), 
+            rightElbowAnchor.x(), 
+            rightElbowAnchor.y()
+        ])
+
+        rightUpperArm.points([
+            rightElbowAnchor.x(),
+            rightElbowAnchor.y(),
+            rightShoulderAnchor.x(),
+            rightShoulderAnchor.y()
+        ])
+    });
+
+    let rightShoulderAnchor = new Konva.Circle({
+        x: poses[0].pose.rightShoulder.x,
+        y: poses[0].pose.rightShoulder.y,
+        radius: 10,
+        stroke: '#666',
+        fill: '#ddd',
+        strokeWidth: 2,
+        //draggable: true,
+    })
+
+    // Create the body
+    let bodyAnchor = new Konva.Line({
+        points: [rightShoulderAnchor.x(), rightShoulderAnchor.y(), leftShoulderAnchor.x(), leftShoulderAnchor.y(), leftHipAnchor.x(), leftHipAnchor.y(), rightHipAnchor.x(), rightHipAnchor.y()],
+        closed: true,
+        stroke: 'black',
+        fill: '#000',
+        strokeWidth: 5,
+        draggable: true
+    })
+
+    bodyGroup.add(rightAnkleAnchor)
+    bodyGroup.add(rightKneeAnchor)
+    bodyGroup.add(rightHipAnchor)
+    bodyGroup.add(rightLowerLeg)
+    bodyGroup.add(rightUpperLeg)
+
+    bodyAnchor.on('dragmove', function() {
+        console.log(bodyGroup)
+    });
+
+    
+
+    layer.add(bodyAnchor)
+
+    layer.add(rightAnkleAnchor)
+    layer.add(rightKneeAnchor)
+    layer.add(rightHipAnchor)
+    layer.add(rightLowerLeg)
+    layer.add(rightUpperLeg)
+    
+    layer.add(rightElbowAnchor)
+    layer.add(rightShoulderAnchor)
+    layer.add(rightWristAnchor)
+    layer.add(rightForearm)
+    layer.add(rightUpperArm)
+
     layer.add(leftAnkleAnchor)
     layer.add(leftKneeAnchor)
     layer.add(leftHipAnchor)
@@ -245,6 +432,7 @@ function initCanvas() {
     layer.add(leftWristAnchor)
     layer.add(leftForearm)
     layer.add(leftUpperArm)
+
     stage.add(layer)
 }
 
