@@ -1,9 +1,79 @@
 let img; let poseNet; let poses = [];
+let defaultPose =  {
+    "Description": "",
+    "leftAnkle" : {
+        "x": 0,
+        "y": 0
+    },
+    "leftKnee" : {
+        "x": 0,
+        "y": 0
+    },
+    "leftHip" : {
+        "x": 0,
+        "y": 0
+    },
+    "rightAnkle" : {
+        "x": 0,
+        "y": 0
+    },
+    "rightKnee" : {
+        "x": 0,
+        "y": 0
+    },
+    "rightHip" : {
+        "x": 0,
+        "y": 0
+    },
+    "leftWrist" : {
+        "x": 0,
+        "y": 0
+    },
+    "leftElbow" : {
+        "x": 0,
+        "y": 0
+    },
+    "leftShoulder" : {
+        "x": 0,
+        "y": 0
+    },
+    "rightWrist" : {
+        "x": 0,
+        "y": 0
+    },
+    "rightElbow" : {
+        "x": 0,
+        "y": 0
+    },
+    "rightShoulder" : {
+        "x": 0,
+        "y": 0
+    }
+}
+let routeJson = {
+    "routeName": "My cool route",
+    "routeDescription": "This route is very hard, uses a lot of slopers",
+    "stickmanLimits": {
+        "leftCalf": 100,
+        "leftThigh": 100,
+        "rightCalf": 100,
+        "rightThigh": 100,
+        "leftForearm": 100,
+        "leftUpperArm": 100,
+        "rightForearm": 100,
+        "rightUpperArm": 100,
+        "bodyWidth": 100,
+        "bodyHeight": 100
+    },
+    "poses": [
+       
+    ]
+}
+
 function setup() {
     createCanvas(515, 720);
     img = createImg('data/route.jpg', imageReady);
     img.size(width, height);
-
     img.hide(); // hide the image in the browser
     frameRate(1); // set the frameRate to 1 since we don't need it to be running quickly in this case
 }
@@ -37,6 +107,7 @@ function modelReady() {
 function draw() {
     if (poses.length > 0) {
         image(img, 0, 0, width, height);
+        initJson()
         initCanvas();
         drawSkeleton(poses);
         drawKeypoints(poses);
@@ -79,7 +150,49 @@ function drawSkeleton() {
     }
 }
 
+function initJson() {
+
+    defaultPose.leftAnkle = poses[0].pose.leftAnkle
+    defaultPose.leftKnee = poses[0].pose.leftKnee
+    defaultPose.leftHip = poses[0].pose.leftHip
+
+    defaultPose.rightAnkle = poses[0].pose.rightAnkle
+    defaultPose.rightKnee = poses[0].pose.rightKnee
+    defaultPose.rightHip = poses[0].pose.rightHip
+
+    defaultPose.leftWrist = poses[0].pose.leftWrist
+    defaultPose.leftElbow = poses[0].pose.leftElbow
+    defaultPose.leftShoulder = poses[0].pose.leftShoulder
+
+    defaultPose.rightWrist = poses[0].pose.leftWrist
+    defaultPose.rightElbow = poses[0].pose.leftElbow
+    defaultPose.rightShoulder = poses[0].pose.leftShoulder
+
+    routeJson.poses.push(defaultPose)
+
+
+    routeJson.stickmanLimits.rightCalf = calcMaxLength(defaultPose.rightAnkle, defaultPose.rightKnee)
+    routeJson.stickmanLimits.rightThigh = calcMaxLength(defaultPose.rightHip, defaultPose.rightKnee)
+    routeJson.stickmanLimits.leftCalf = calcMaxLength(defaultPose.leftAnkle, defaultPose.leftKnee)
+    routeJson.stickmanLimits.leftThigh = calcMaxLength(defaultPose.leftHip, defaultPose.leftKnee)
+    routeJson.stickmanLimits.leftUpperArm = calcMaxLength(defaultPose.leftShoulder, defaultPose.leftElbow)
+    routeJson.stickmanLimits.leftForearm = calcMaxLength(defaultPose.leftElbow, defaultPose.leftWrist)
+    routeJson.stickmanLimits.rightUpperArm = calcMaxLength(defaultPose.rightShoulder, defaultPose.rightElbow)
+    routeJson.stickmanLimits.rightForearm = calcMaxLength(defaultPose.rightElbow, defaultPose.rightWrist)
+    let bodyWidth = (calcMaxLength(defaultPose.leftShoulder, defaultPose.rightShoulder) + calcMaxLength(defaultPose.leftHip, defaultPose.rightHip))/2
+    routeJson.stickmanLimits.bodyWidth = bodyWidth
+    let bodyHeight = (calcMaxLength(defaultPose.leftShoulder, defaultPose.leftHip) + calcMaxLength(defaultPose.rightShoulder, defaultPose.rightHip))/2
+    routeJson.stickmanLimits.bodyHeight = bodyHeight
+
+    console.log(routeJson)
+}
+
+function calcMaxLength (a, b) {
+    return (Math.sqrt(Math.pow(Math.abs(a.x-b.x),2) + Math.pow(Math.abs(a.y-b.x),2)))
+}
+
 function initCanvas() {
+    print("init")
     let width = 515
     let height = 720
 
@@ -92,6 +205,9 @@ function initCanvas() {
     let layer = new Konva.Layer()
 
     let bodyGroup = new Konva.Group();
+
+
+
 
     let leftLowerLeg = new Konva.Line({
         points: [poses[0].pose.leftAnkle.x, poses[0].pose.leftAnkle.y, poses[0].pose.leftKnee.x, poses[0].pose.leftKnee.y],
@@ -161,16 +277,6 @@ function initCanvas() {
     })
 
 
-
-
-
-
-
-
-
-
-
-
     let rightLowerLeg = new Konva.Line({
         points: [poses[0].pose.rightAnkle.x, poses[0].pose.rightAnkle.y, poses[0].pose.rightKnee.x, poses[0].pose.rightKnee.y],
         stroke: 'red',
@@ -237,16 +343,6 @@ function initCanvas() {
         strokeWidth: 2,
         //draggable: true,
     })
-
-
-
-
-
-
-
-
-
-
 
 
     let leftForearm = new Konva.Line({
