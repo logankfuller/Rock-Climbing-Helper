@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>PoseNet example on image with single detection using p5.js</title>
-
+    <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/konva@7.0.3/konva.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
@@ -14,8 +14,7 @@
 
 <body>
     <!-- <canvas id="c" width="100%" height="500" style="border:1px solid #ccc"></canvas> -->
-    <h1>PoseNet example on image with single detection using p5.js</h1>
-    <p id='status'>Loading model...</p>
+    <div class="topBar"><p id='status'>Loading model...</p></div>
     <div id="container"></div>
     <div id="limbs">
         <!-- <p id="left_leg">Left Leg Length (Px): </p>
