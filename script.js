@@ -185,11 +185,8 @@ function initJson() {
     defaultPose.rightShoulder = poses[selectedPose].pose.rightShoulder
 
     routeJson.poses.push(JSON.parse(JSON.stringify(defaultPose)))
-    defaultPose.Description = "bobobobobobob"
     routeJson.poses.push(JSON.parse(JSON.stringify(defaultPose)))
-    defaultPose.Description = "woob"
     routeJson.poses.push(JSON.parse(JSON.stringify(defaultPose)))
-    defaultPose.Description = "a"
     routeJson.poses.push(JSON.parse(JSON.stringify(defaultPose)))
 
     routeJson.stickmanLimits.rightCalf = calcMaxLength(defaultPose.rightAnkle, defaultPose.rightKnee)
@@ -297,8 +294,6 @@ function initCanvas() {
 
 }
 function updateSkeletonLayerLocations () {
-    leftLowerLeg.points([routeJson.poses[selectedPose].leftAnkle.x, routeJson.poses[selectedPose].leftAnkle.y, routeJson.poses[selectedPose].leftKnee.x, routeJson.poses[selectedPose].leftKnee.y])
-    leftUpperLeg.points([routeJson.poses[selectedPose].leftKnee.x, routeJson.poses[selectedPose].leftKnee.y, routeJson.poses[selectedPose].leftHip.x, routeJson.poses[selectedPose].leftHip.y])
     leftKneeAnchor.absolutePosition({
         x: routeJson.poses[selectedPose].leftKnee.x,
         y: routeJson.poses[selectedPose].leftKnee.y
@@ -311,9 +306,10 @@ function updateSkeletonLayerLocations () {
         x: routeJson.poses[selectedPose].leftAnkle.x,
         y: routeJson.poses[selectedPose].leftAnkle.y
       });
+    leftLowerLeg.points([leftAnkleAnchor.x(), leftAnkleAnchor.y(), leftKneeAnchor.x(), leftKneeAnchor.y()])
+    leftUpperLeg.points([leftKneeAnchor.x(), leftKneeAnchor.y(), leftHipAnchor.x(), leftHipAnchor.y()])
+    
 
-    rightLowerLeg.points([routeJson.poses[selectedPose].rightAnkle.x, routeJson.poses[selectedPose].rightAnkle.y, routeJson.poses[selectedPose].rightKnee.x, routeJson.poses[selectedPose].rightKnee.y])
-    rightUpperLeg.points([routeJson.poses[selectedPose].rightKnee.x, routeJson.poses[selectedPose].rightKnee.y, routeJson.poses[selectedPose].rightHip.x, routeJson.poses[selectedPose].rightHip.y])
     rightAnkleAnchor.absolutePosition({
         x: routeJson.poses[selectedPose].rightAnkle.x,
         y: routeJson.poses[selectedPose].rightAnkle.y
@@ -326,9 +322,9 @@ function updateSkeletonLayerLocations () {
         x: routeJson.poses[selectedPose].rightHip.x,
         y: routeJson.poses[selectedPose].rightHip.y
     });
-
-    leftForearm.points([routeJson.poses[selectedPose].leftWrist.x, routeJson.poses[selectedPose].leftWrist.y, routeJson.poses[selectedPose].leftElbow.x, routeJson.poses[selectedPose].leftElbow.y])
-    leftUpperArm.points([routeJson.poses[selectedPose].leftElbow.x, routeJson.poses[selectedPose].leftElbow.y, routeJson.poses[selectedPose].leftShoulder.x, routeJson.poses[selectedPose].leftShoulder.y])
+    rightLowerLeg.points([rightAnkleAnchor.x(), rightAnkleAnchor.y(), rightKneeAnchor.x(), rightKneeAnchor.y()])
+    rightUpperLeg.points([rightKneeAnchor.x(), rightKneeAnchor.y(), rightHipAnchor.x(), rightHipAnchor.y()])
+    
     leftWristAnchor.absolutePosition({
         x: routeJson.poses[selectedPose].leftWrist.x,
         y: routeJson.poses[selectedPose].leftWrist.y
@@ -342,11 +338,11 @@ function updateSkeletonLayerLocations () {
         y: routeJson.poses[selectedPose].leftShoulder.y
     });
 
+    leftForearm.points([leftWristAnchor.x(), leftWristAnchor.y(), leftElbowAnchor.x(), leftElbowAnchor.y()])
+    leftUpperArm.points([leftElbowAnchor.x(), leftElbowAnchor.y(), leftShoulderAnchor.x(), leftShoulderAnchor.y()])
 
 
-    rightForearm.points([routeJson.poses[selectedPose].rightWrist.x, routeJson.poses[selectedPose].rightWrist.y, routeJson.poses[selectedPose].rightElbow.x, routeJson.poses[selectedPose].rightElbow.y])
-    rightUpperArm.points([routeJson.poses[selectedPose].rightElbow.x, routeJson.poses[selectedPose].rightElbow.y, routeJson.poses[selectedPose].rightShoulder.x, routeJson.poses[selectedPose].rightShoulder.y])
-
+   
     rightWristAnchor.absolutePosition({
         x: routeJson.poses[selectedPose].rightWrist.x,
         y: routeJson.poses[selectedPose].rightWrist.y
@@ -359,6 +355,10 @@ function updateSkeletonLayerLocations () {
         x: routeJson.poses[selectedPose].rightShoulder.x,
         y: routeJson.poses[selectedPose].rightShoulder.y
     });
+
+    rightForearm.points([rightWristAnchor.x(), rightWristAnchor.y(), rightElbowAnchor.x(), rightElbowAnchor.y()])
+    rightUpperArm.points([rightElbowAnchor.x(), rightElbowAnchor.y(), rightShoulderAnchor.x(), rightShoulderAnchor.y()])
+
 
     bodyAnchor.points([rightShoulderAnchor.x(), rightShoulderAnchor.y(), leftShoulderAnchor.x(), leftShoulderAnchor.y(), leftHipAnchor.x(), leftHipAnchor.y(), rightHipAnchor.x(), rightHipAnchor.y()])
     
@@ -590,7 +590,16 @@ function makeSkeletonLayer () {
         draggable: true,
     })
     
-    
+    leftShoulderAnchor = new Konva.Circle({
+        x: routeJson.poses[selectedPose].leftShoulder.x,
+        y: routeJson.poses[selectedPose].leftShoulder.y,
+        radius: 10,
+        stroke: '#666',
+        fill: '#ddd',
+        strokeWidth: 2,
+        //draggable: true,
+    })
+
     leftElbowAnchor.on('dragmove', function() {
         leftForearm.points([
             leftWristAnchor.x(), 
@@ -613,15 +622,7 @@ function makeSkeletonLayer () {
         routeJson.poses[selectedPose].leftShoulder.y = leftShoulderAnchor.y()
     });
     
-    leftShoulderAnchor = new Konva.Circle({
-        x: routeJson.poses[selectedPose].leftShoulder.x,
-        y: routeJson.poses[selectedPose].leftShoulder.y,
-        radius: 10,
-        stroke: '#666',
-        fill: '#ddd',
-        strokeWidth: 2,
-        //draggable: true,
-    })
+    
 
     
 
@@ -722,6 +723,8 @@ function makeSkeletonLayer () {
     bodyGroup.add(leftHipAnchor)
     bodyGroup.add(rightHipAnchor)
 
+    bodyGroup.add(leftShoulderAnchor)
+    bodyGroup.add(rightShoulderAnchor)
     bodyGroup.add(leftElbowAnchor)
     bodyGroup.add(rightElbowAnchor)
     bodyGroup.add(leftWristAnchor)
@@ -755,16 +758,6 @@ function makeSkeletonLayer () {
     rightUpperLeg.moveToBottom()
     rightLowerLeg.moveToBottom()
 
-    layer.add(leftAnkleAnchor)
-    layer.add(leftKneeAnchor)
-    layer.add(leftHipAnchor)
-    layer.add(leftLowerLeg)
-    layer.add(leftUpperLeg)
 
-    layer.add(leftElbowAnchor)
-    layer.add(leftShoulderAnchor)
-    layer.add(leftWristAnchor)
-    layer.add(leftForearm)
-    layer.add(leftUpperArm)
     stage.add(layer)
 }
