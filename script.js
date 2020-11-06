@@ -232,7 +232,7 @@ function initCanvas() {
       imageLayer.batchDraw();
     };
     
-    imageObj.src = '/data/route.jpg';
+    imageObj.src = 'data/route.jpg';
     
     stage.add(imageLayer)
 
