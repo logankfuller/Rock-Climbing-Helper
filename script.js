@@ -209,7 +209,8 @@ function initJson() {
 }
 
 function calcMaxLength (a, b) {
-    return (Math.sqrt(Math.pow(Math.abs(a.x-b.x,2)) + Math.pow(Math.abs(a.y-b.x,2))))
+    return Math.sqrt(Math.pow(a.x-b.x, 2) + (Math.pow(a.y-b.y, 2)))
+    //return (Math.sqrt(Math.pow(Math.abs(a.x-b.x), 2) + Math.pow(Math.abs(a.y-b.x), 2)))
 }
 
 function initCanvas() {
@@ -231,7 +232,7 @@ function initCanvas() {
       imageLayer.batchDraw();
     };
     
-    imageObj.src = '/data/route.jpg';
+    imageObj.src = 'data/route.jpg';
     
     stage.add(imageLayer)
 
@@ -366,7 +367,9 @@ function updateSkeletonLayerLocations () {
 function makeSkeletonLayer () {
     layer = new Konva.Layer()
 
-    bodyGroup = new Konva.Group();
+    bodyGroup = new Konva.Group({
+        draggable: true,
+    });
 
     leftLowerLeg = new Konva.Line({
         points: [routeJson.poses[selectedPose].leftAnkle.x, routeJson.poses[selectedPose].leftAnkle.y, routeJson.poses[selectedPose].leftKnee.x, routeJson.poses[selectedPose].leftKnee.y],
@@ -388,12 +391,29 @@ function makeSkeletonLayer () {
         fill: '#ddd',
         strokeWidth: 2,
         draggable: true,
+        dragBoundFunc: function (pos) {
+            var x = routeJson.poses[selectedPose].leftKnee.x;
+            var y = routeJson.poses[selectedPose].leftKnee.y;
+            var radius = routeJson.stickmanLimits.leftCalf;
+            console.log(radius)
+            var scale = radius / Math.sqrt(Math.pow(pos.x - x, 2) + Math.pow(pos.y - y, 2));
+            if (scale < 1)
+                return {
+                y: Math.round((pos.y - y) * scale + y),
+                x: Math.round((pos.x - x) * scale + x),
+                };
+            else return pos;
+        },
     })
 
     leftAnkleAnchor.on('dragmove', function() {
+        let distance = calcMaxLength(routeJson.poses[selectedPose].leftAnkle, routeJson.poses[selectedPose].leftKnee)
+        console.log(leftAnkleAnchor)
+        console.log(distance)
+        console.log('Distance Limit: ' + routeJson.stickmanLimits.leftCalf)
         leftLowerLeg.points([
             leftAnkleAnchor.x(), 
-            leftAnkleAnchor.y(), 
+            leftAnkleAnchor.y(),
             leftKneeAnchor.x(), 
             leftKneeAnchor.y()
         ])
@@ -691,34 +711,49 @@ function makeSkeletonLayer () {
         stroke: 'black',
         fill: '#000',
         strokeWidth: 5,
-        draggable: true
     })
 
-    bodyGroup.add(rightAnkleAnchor)
-    bodyGroup.add(rightKneeAnchor)
-    bodyGroup.add(rightHipAnchor)
-    bodyGroup.add(rightLowerLeg)
-    bodyGroup.add(rightUpperLeg)
+    bodyGroup.add(bodyAnchor)
 
-    bodyAnchor.on('dragmove', function() {
-        console.log(bodyGroup)
+    bodyGroup.add(leftAnkleAnchor)
+    bodyGroup.add(rightAnkleAnchor)
+    bodyGroup.add(leftKneeAnchor)
+    bodyGroup.add(rightKneeAnchor)
+    bodyGroup.add(leftHipAnchor)
+    bodyGroup.add(rightHipAnchor)
+
+    bodyGroup.add(leftElbowAnchor)
+    bodyGroup.add(rightElbowAnchor)
+    bodyGroup.add(leftWristAnchor)
+    bodyGroup.add(rightWristAnchor)
+
+    bodyGroup.add(leftUpperLeg)
+    bodyGroup.add(rightUpperLeg)
+    bodyGroup.add(leftLowerLeg)
+    bodyGroup.add(rightLowerLeg)
+    bodyGroup.add(leftUpperArm)
+    bodyGroup.add(rightUpperArm)
+    bodyGroup.add(leftForearm)
+    bodyGroup.add(rightForearm)
+
+    bodyGroup.on('mouseover', function () {
+        document.body.style.cursor = 'pointer';
     });
 
-    
+    bodyGroup.on('mouseout', function () {
+        document.body.style.cursor = 'default';
+    });
 
-    layer.add(bodyAnchor)
+    layer.add(bodyGroup)
 
-    layer.add(rightAnkleAnchor)
-    layer.add(rightKneeAnchor)
-    layer.add(rightHipAnchor)
-    layer.add(rightLowerLeg)
-    layer.add(rightUpperLeg)
-    
-    layer.add(rightElbowAnchor)
-    layer.add(rightShoulderAnchor)
-    layer.add(rightWristAnchor)
-    layer.add(rightForearm)
-    layer.add(rightUpperArm)
+    leftUpperArm.moveToBottom()
+    leftForearm.moveToBottom()
+    leftUpperLeg.moveToBottom()
+    leftLowerLeg.moveToBottom()
+    rightUpperArm.moveToBottom()
+    rightForearm.moveToBottom()
+    rightUpperLeg.moveToBottom()
+    rightLowerLeg.moveToBottom()
 
     layer.add(leftAnkleAnchor)
     layer.add(leftKneeAnchor)
@@ -733,30 +768,3 @@ function makeSkeletonLayer () {
     layer.add(leftUpperArm)
     stage.add(layer)
 }
-
-// function drawStickman() {
-//     var canvas = this.__canvas = new fabric.Canvas('c', { selection: false });
-//     fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
-    
-//     function makeLine(coords) {
-//       return new fabric.Line(coords, {
-//         fill: 'red',
-//         stroke: 'red',
-//         strokeWidth: 5,
-//         selectable: false,
-//         evented: false,
-//       });
-//     }
-
-//     // poses[0].pose.leftAnkle.x
-  
-//     // Hmm, how to convert coordinates from exact coordinate to corner coordinates?
-//     // 0,0            100,0
-//     //
-//     //                               ---> 30,50 = +30 on x, -50 from top of y-axis
-//     //
-//     // 0,100          100,100
-//     var leftLowerLeg = makeLine([ 250, 175, 250, 250 ]);
-  
-//     canvas.add(leftLowerLeg);
-//   }
