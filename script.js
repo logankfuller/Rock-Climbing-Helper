@@ -442,8 +442,8 @@ function makeSkeletonLayer () {
         strokeWidth: 2,
         draggable: true,
         dragBoundFunc: function (pos) {
-            var x = routeJson.poses[selectedPose].leftKnee.x;
-            var y = routeJson.poses[selectedPose].leftKnee.y;
+            var x = routeJson.poses[selectedPose].leftKnee.x + bodyGroup.x();
+            var y = routeJson.poses[selectedPose].leftKnee.y + bodyGroup.y();
             var radius = routeJson.stickmanLimits.leftCalf;
             console.log(radius)
             var scale = radius / Math.sqrt(Math.pow(pos.x - x, 2) + Math.pow(pos.y - y, 2));
