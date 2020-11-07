@@ -386,6 +386,18 @@ function updateSkeletonLayerLocations () {
     bodyGroup.y(routeJson.poses[selectedPose].body.y)
     layer.draw();
 }
+
+function genericBoundFunction(pos, x, y, radius) {
+    console.log(radius)
+    var scale = radius / Math.sqrt(Math.pow(pos.x - x, 2) + Math.pow(pos.y - y, 2));
+    if (scale < 1)
+        return {
+        y: Math.round((pos.y - y) * scale + y),
+        x: Math.round((pos.x - x) * scale + x),
+        };
+    else return pos;
+}
+
 function makeSkeletonLayer () {
     layer = new Konva.Layer()
 
@@ -442,18 +454,8 @@ function makeSkeletonLayer () {
         strokeWidth: 2,
         draggable: true,
         dragBoundFunc: function (pos) {
-            var x = routeJson.poses[selectedPose].leftKnee.x + bodyGroup.x();
-            var y = routeJson.poses[selectedPose].leftKnee.y + bodyGroup.y();
-            var radius = routeJson.stickmanLimits.leftCalf;
-            console.log(radius)
-            var scale = radius / Math.sqrt(Math.pow(pos.x - x, 2) + Math.pow(pos.y - y, 2));
-            if (scale < 1)
-                return {
-                y: Math.round((pos.y - y) * scale + y),
-                x: Math.round((pos.x - x) * scale + x),
-                };
-            else return pos;
-        },
+            return genericBoundFunction(pos, routeJson.poses[selectedPose].leftKnee.x + bodyGroup.x(), routeJson.poses[selectedPose].leftKnee.y + bodyGroup.y(), routeJson.stickmanLimits.leftCalf)
+        }
     })
 
     leftAnkleAnchor.on('dragmove', function() {
@@ -479,6 +481,9 @@ function makeSkeletonLayer () {
         fill: '#ddd',
         strokeWidth: 2,
         draggable: true,
+        dragBoundFunc: function (pos) {
+            return genericBoundFunction(pos, routeJson.poses[selectedPose].leftHip.x + bodyGroup.x(), routeJson.poses[selectedPose].leftHip.y + bodyGroup.y(), routeJson.stickmanLimits.leftThigh)
+        }
     })
 
     leftKneeAnchor.on('dragmove', function() {
@@ -736,6 +741,7 @@ function makeSkeletonLayer () {
         closed: true,
         stroke: 'black',
         fill: '#000',
+        opacity: 0.7,
         strokeWidth: 5,
     })
 
