@@ -393,11 +393,8 @@ function makeSkeletonLayer () {
         draggable: true,
     });
     bodyGroup.on('dragmove', function () {
-        print(bodyGroup.x())
-        print(bodyGroup.y())
         routeJson.poses[selectedPose].body.x = bodyGroup.x()
         routeJson.poses[selectedPose].body.y = bodyGroup.y()
-        print("yeah?")
         /*routeJson.poses[selectedPose].rightElbow.x = rightElbowAnchor.x()
         routeJson.poses[selectedPose].rightElbow.y = rightElbowAnchor.y()
         routeJson.poses[selectedPose].rightWrist.x = rightWristAnchor.x()
