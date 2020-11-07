@@ -89,7 +89,7 @@ let routeJson = {
 }
 
 let bodyGroup, leftLowerLeg, leftUpperLeg, leftAnkleAnchor, leftKneeAnchor, leftHipAnchor, rightLowerLeg, rightUpperLeg, rightAnkleAnchor, rightKneeAnchor, rightHipAnchor, leftForearm, leftUpperArm, leftWristAnchor, leftElbowAnchor, leftShoulderAnchor, rightForearm, rightUpperArm, rightWristAnchor, rightElbowAnchor, rightShoulderAnchor, bodyAnchor; 
-
+let addHorizontalLine, addVerticalLine;
 
 function setup() {
     createCanvas(515, 720);
@@ -251,6 +251,26 @@ function initCanvas() {
         fill: 'White',
       });
 
+
+    deleteText = new Konva.Text({
+        x: stage.width()-(170 ),
+        y: stage.height()-50,
+        text:"Delete",
+        fontSize: 30,
+        fontFamily: 'Sans-serif',
+        fill: 'Red',
+      });
+      deleteText.on('click', function () {
+          if (routeJson.poses.length > 1) {
+                routeJson.poses = routeJson.poses.filter(item => item !== routeJson.poses[selectedPose])
+              if (selectedPose > 0) {
+                  selectedPose--
+              }
+              checkArrows();
+              updateSkeletonLayerLocations();
+              arrowLayer.draw();
+          }
+      })
     
     forwardArrow = new Konva.Wedge({
       x: stage.width()-5,
@@ -262,13 +282,47 @@ function initCanvas() {
       strokeWidth: 4,
       rotation: 150,
     });
+
     forwardArrow.on('click', function () {
         if (selectedPose < routeJson.poses.length-1)
             selectedPose++
-        simpleText.text(""+(selectedPose+1)+"/"+routeJson.poses.length)
         checkArrows();
         arrowLayer.draw()
         updateSkeletonLayerLocations()
+    })
+
+
+    addVerticalLine = new Konva.Line({
+        points: [width-50, (height/2)-30, width-50, (height/2)+30],
+        stroke: 'white',
+        strokeWidth: 10,
+      });
+      
+    addVerticalLine.on('click', function () {
+        if (addVerticalLine.opacity() > 0) {
+          routeJson.poses.push(JSON.parse(JSON.stringify(routeJson.poses[selectedPose])))
+          selectedPose++
+          checkArrows();
+          arrowLayer.draw()
+          updateSkeletonLayerLocations()
+        }
+    })
+
+    addHorizontalLine = new Konva.Line({
+        points: [width-20, (height/2), width-80, (height/2)],
+        stroke: 'white',
+        strokeWidth: 10,
+      });
+      
+    addHorizontalLine.on('click', function () {
+        if (addHorizontalLine.opacity() > 0) {
+          routeJson.poses.push(JSON.parse(JSON.stringify(routeJson.poses[selectedPose])))
+          selectedPose++
+          simpleText.text(""+(selectedPose+1)+"/"+routeJson.poses.length)
+          checkArrows();
+          arrowLayer.draw()
+          updateSkeletonLayerLocations()
+    }
     })
 
     
@@ -295,12 +349,16 @@ function initCanvas() {
     // add the shape to the layer
     arrowLayer.add(forwardArrow);
     arrowLayer.add(backwardArrow);
+    arrowLayer.add(addVerticalLine);
+    arrowLayer.add(addHorizontalLine);
     arrowLayer.add(simpleText);
+    arrowLayer.add(deleteText);
     // add the layer to the stage
     stage.add(arrowLayer);
     
 }
 function checkArrows () {
+    simpleText.text(""+(selectedPose+1)+"/"+routeJson.poses.length)
     if (selectedPose == 0) {
         backwardArrow.opacity(0.0);
     } else {
@@ -308,8 +366,15 @@ function checkArrows () {
     }
     if (selectedPose == (routeJson.poses.length-1)) {
         forwardArrow.opacity(0.0);
+        forwardArrow.moveToBottom();
+        addVerticalLine.opacity(1.0);
+        addHorizontalLine.opacity(1.0);
     } else {
         forwardArrow.opacity(1.0);
+        addVerticalLine.opacity(0.0);
+        addHorizontalLine.opacity(0.0);
+        addVerticalLine.moveToBottom();
+        addHorizontalLine.moveToBottom();
     }
 }
 function updateSkeletonLayerLocations () {
