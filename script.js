@@ -4,17 +4,20 @@ let simpleText;
 let width = 515;
 let height = 720;
 let arrowLayer;
-var backwardArrow;
-var forwardArrow;
+let backwardArrow;
+let forwardArrow;
+
 let stage = new Konva.Stage({
-        container: 'container',
-        width,
-        height
-    });
-let layer;
+    container: 'container',
+    width: width,
+    height: height,
+});
+
+let skeletonLayer;
 
 let defaultPose =  {
-    "Description": "",
+    "description": "",
+    "rotation": 0,
     "leftAnkle" : {
         "x": 0,
         "y": 0
@@ -68,6 +71,7 @@ let defaultPose =  {
         "y": 0
     }
 }
+
 let routeJson = {
     "routeName": "My cool route",
     "routeDescription": "This route is very hard, uses a lot of slopers",
@@ -90,110 +94,57 @@ let routeJson = {
 
 let bodyGroup, leftLowerLeg, leftUpperLeg, leftAnkleAnchor, leftKneeAnchor, leftHipAnchor, rightLowerLeg, rightUpperLeg, rightAnkleAnchor, rightKneeAnchor, rightHipAnchor, leftForearm, leftUpperArm, leftWristAnchor, leftElbowAnchor, leftShoulderAnchor, rightForearm, rightUpperArm, rightWristAnchor, rightElbowAnchor, rightShoulderAnchor, bodyAnchor; 
 
-
 function setup() {
-    createCanvas(515, 720);
+    createCanvas(width, height);
     img = createImg('data/route.jpg', imageReady);
     img.size(width, height);
     img.hide(); // hide the image in the browser
     frameRate(1); // set the frameRate to 1 since we don't need it to be running quickly in this case
 }
-// when the image is ready, then load up poseNet
-function imageReady(){
-    // set some options
+
+function imageReady() {
     let options = {
         imageScaleFactor: 1,
         minConfidence: 0.1
     }
-    
-    // assign poseNet
     poseNet = ml5.poseNet(modelReady, options);
 
-    // This sets up an event that listens to 'pose' events
     poseNet.on('pose', function (results) {
         poses = results;
-        console.log(poses)
     });
 }
-// when poseNet is ready, do the detection
+
 function modelReady() {
     select('#status').html('Model Loaded');
-    
-    // When the model is ready, run the singlePose() function...
-    // If/When a pose is detected, poseNet.on('pose', ...) will be listening for the detection results 
-    // in the draw() loop, if there are any poses, then carry out the draw commands
     poseNet.singlePose(img)
 }
-// draw() will not show anything until poses are found
+
 function draw() {
     if (poses.length > 0) {
-        image(img, 0, 0, width, height);
         initJson()
         initCanvas();
-        drawSkeleton(poses);
-        drawKeypoints(poses);
-        //drawStickman();
-        noLoop(); // stop looping when the poses are estimated
-    }
-}
-// The following comes from https://ml5js.org/docs/posenet-webcam // A function to draw ellipses over the detected keypoints
-function drawKeypoints() {
-    // Loop through all the poses detected
-    for (let i = 0; i < poses.length; i++) {
-        // For each pose detected, loop through all the keypoints
-        let pose = poses[i].pose;
-        for (let j = 0; j < pose.keypoints.length; j++) {
-            // A keypoint is an object describing a body part (like rightArm or leftShoulder)
-            let keypoint = pose.keypoints[j];
-            // Only draw an ellipse is the pose probability is bigger than 0.2
-            if (keypoint.score > 0.2) {
-                fill(255);
-                stroke(20);
-                strokeWeight(4);
-                ellipse(round(keypoint.position.x), round(keypoint.position.y), 8, 8);
-            }
-        }
-    }
-}
-// A function to draw the skeletons
-function drawSkeleton() {
-    // Loop through all the skeletons detected
-    for (let i = 0; i < poses.length; i++) {
-        let skeleton = poses[i].skeleton;
-        // For every skeleton, loop through all body connections
-        for (let j = 0; j < skeleton.length; j++) {
-            let partA = skeleton[j][0];
-            let partB = skeleton[j][1];
-            stroke(255);
-            strokeWeight(1);
-            line(partA.position.x, partA.position.y, partB.position.x, partB.position.y);
-        }
+        noLoop();
     }
 }
 
+function calcMaxLength (a, b) {
+    return Math.sqrt(Math.pow(a.x-b.x, 2) + (Math.pow(a.y-b.y, 2)))
+}
+
+/** 
+ * Initializes the JSON by calculating the limb length limits, and default pose coordinates
+ */
 function initJson() {
-
-    defaultPose.leftAnkle = poses[selectedPose].pose.leftAnkle
-    defaultPose.leftKnee = poses[selectedPose].pose.leftKnee
-    defaultPose.leftHip = poses[selectedPose].pose.leftHip
-
-    defaultPose.rightAnkle = poses[selectedPose].pose.rightAnkle
-    defaultPose.rightKnee = poses[selectedPose].pose.rightKnee
-    defaultPose.rightHip = poses[selectedPose].pose.rightHip
-
-    defaultPose.leftWrist = poses[selectedPose].pose.leftWrist
-    defaultPose.leftElbow = poses[selectedPose].pose.leftElbow
-    defaultPose.leftShoulder = poses[selectedPose].pose.leftShoulder
-
-    defaultPose.rightWrist = poses[selectedPose].pose.rightWrist
-    defaultPose.rightElbow = poses[selectedPose].pose.rightElbow
-    defaultPose.rightShoulder = poses[selectedPose].pose.rightShoulder
+    for(pose in defaultPose) {
+        if(pose in poses[selectedPose].pose) {
+            defaultPose[pose] = poses[selectedPose].pose[pose]
+        }
+    }
 
     routeJson.poses.push(JSON.parse(JSON.stringify(defaultPose)))
     routeJson.poses.push(JSON.parse(JSON.stringify(defaultPose)))
-    routeJson.poses.push(JSON.parse(JSON.stringify(defaultPose)))
-    routeJson.poses.push(JSON.parse(JSON.stringify(defaultPose)))
 
+    // Calculate and assign limb length limits
     routeJson.stickmanLimits.rightCalf = calcMaxLength(defaultPose.rightAnkle, defaultPose.rightKnee)
     routeJson.stickmanLimits.rightThigh = calcMaxLength(defaultPose.rightHip, defaultPose.rightKnee)
     routeJson.stickmanLimits.leftCalf = calcMaxLength(defaultPose.leftAnkle, defaultPose.leftKnee)
@@ -202,26 +153,29 @@ function initJson() {
     routeJson.stickmanLimits.leftForearm = calcMaxLength(defaultPose.leftElbow, defaultPose.leftWrist)
     routeJson.stickmanLimits.rightUpperArm = calcMaxLength(defaultPose.rightShoulder, defaultPose.rightElbow)
     routeJson.stickmanLimits.rightForearm = calcMaxLength(defaultPose.rightElbow, defaultPose.rightWrist)
-    let bodyWidth = (calcMaxLength(defaultPose.leftShoulder, defaultPose.rightShoulder) + calcMaxLength(defaultPose.leftHip, defaultPose.rightHip))/2
+
+    // Calculate and assign bodyWidth limit
+    let bodyWidth = (calcMaxLength(defaultPose.leftShoulder, defaultPose.rightShoulder) + calcMaxLength(defaultPose.leftHip, defaultPose.rightHip)) / 2
     routeJson.stickmanLimits.bodyWidth = bodyWidth
-    let bodyHeight = (calcMaxLength(defaultPose.leftShoulder, defaultPose.leftHip) + calcMaxLength(defaultPose.rightShoulder, defaultPose.rightHip))/2
+
+    // Calculate and assign bodyHeight limit
+    let bodyHeight = (calcMaxLength(defaultPose.leftShoulder, defaultPose.leftHip) + calcMaxLength(defaultPose.rightShoulder, defaultPose.rightHip)) / 2
     routeJson.stickmanLimits.bodyHeight = bodyHeight
 
-    console.log(routeJson)
+    console.log("Finished initializing JSON: ", routeJson)
 }
 
-function calcMaxLength (a, b) {
-    return Math.sqrt(Math.pow(a.x-b.x, 2) + (Math.pow(a.y-b.y, 2)))
-    //return (Math.sqrt(Math.pow(Math.abs(a.x-b.x), 2) + Math.pow(Math.abs(a.y-b.x), 2)))
-}
-
+/**
+ * Initializes the canvas and adds the route image, forward/backward arrows, and status text to the canvas.
+ */
 function initCanvas() {
-    
     let imageLayer = new Konva.Layer()
-
-    var imageObj = new Image();
+    
+    // Create and add our route image to the canvas
+    let imageObj = new Image();
+    imageObj.src = 'data/route.jpg';
     imageObj.onload = function () {
-      var route = new Konva.Image({
+      let route = new Konva.Image({
         x: 0,
         y: 0,
         image: imageObj,
@@ -229,12 +183,9 @@ function initCanvas() {
         height: 720,
       });
 
-      // add the shape to the layer
       imageLayer.add(route);
       imageLayer.batchDraw();
     };
-    
-    imageObj.src = 'data/route.jpg';
     
     stage.add(imageLayer)
 
@@ -262,16 +213,15 @@ function initCanvas() {
       strokeWidth: 4,
       rotation: 150,
     });
+    
     forwardArrow.on('click', function () {
         if (selectedPose < routeJson.poses.length-1)
             selectedPose++
-        simpleText.text(""+(selectedPose+1)+"/"+routeJson.poses.length)
+        simpleText.text(`${selectedPose + 1}/${routeJson.poses.length}`)
         checkArrows();
         arrowLayer.draw()
         updateSkeletonLayerLocations()
     })
-
-    
 
     backwardArrow = new Konva.Wedge({
         x: 5,
@@ -283,23 +233,26 @@ function initCanvas() {
         strokeWidth: 4,
         rotation: 330,
       });
-      backwardArrow.on('click', function () {
-          if (selectedPose > 0)
-                selectedPose--;
-          simpleText.text(""+(selectedPose+1)+"/"+routeJson.poses.length)
-          checkArrows();
-          arrowLayer.draw()
-          updateSkeletonLayerLocations();
-      })
-      checkArrows();
-    // add the shape to the layer
+
+    backwardArrow.on('click', function () {
+        if (selectedPose > 0)
+            selectedPose--;
+        simpleText.text(`${selectedPose + 1}/${routeJson.poses.length}`)
+        checkArrows();
+        arrowLayer.draw()
+        updateSkeletonLayerLocations();
+    })
+    
+    checkArrows();
+
     arrowLayer.add(forwardArrow);
     arrowLayer.add(backwardArrow);
     arrowLayer.add(simpleText);
-    // add the layer to the stage
+
     stage.add(arrowLayer);
-    
 }
+
+// Checks to see whether or not the forward/previous arrow should be visible.
 function checkArrows () {
     if (selectedPose == 0) {
         backwardArrow.opacity(0.0);
@@ -312,21 +265,39 @@ function checkArrows () {
         forwardArrow.opacity(1.0);
     }
 }
+
 function updateSkeletonLayerLocations () {
-    bodyGroup.x(0)
-    bodyGroup.y(0)
+    console.log("Body Group: ", bodyGroup)
+    console.log("Route JSON: ", routeJson.poses)
+    console.log("Transform: ", bodyGroup.getAbsoluteRotation())
+
+    // Set the X/Y coordinates as well as rotation to what is stored in the selected poses routeJson.
+    bodyGroup.absolutePosition({
+        x: routeJson.poses[selectedPose].body.x,
+        y: routeJson.poses[selectedPose].body.y
+    })
+    console.log("setting body group x position to " + routeJson.poses[selectedPose].body.x)
+    //bodyGroup.x(routeJson.poses[selectedPose].body.x)
+    console.log("setting body group y position to " + routeJson.poses[selectedPose].body.y)
+    //bodyGroup.y(routeJson.poses[selectedPose].body.y)
+    console.log("setting body group rotation to " + routeJson.poses[selectedPose].rotation)
+    bodyGroup.rotation(routeJson.poses[selectedPose].rotation)
+
+    console.log("Position should be ", routeJson.poses[selectedPose].body)
+    console.log("But found it at: ", bodyGroup.position())
+    
     leftKneeAnchor.absolutePosition({
         x: routeJson.poses[selectedPose].leftKnee.x,
         y: routeJson.poses[selectedPose].leftKnee.y
-      });
+    });
     leftHipAnchor.absolutePosition({
         x: routeJson.poses[selectedPose].leftHip.x,
         y: routeJson.poses[selectedPose].leftHip.y
-      });
+    });
     leftAnkleAnchor.absolutePosition({
         x: routeJson.poses[selectedPose].leftAnkle.x,
         y: routeJson.poses[selectedPose].leftAnkle.y
-      });
+    });
     leftLowerLeg.points([leftAnkleAnchor.x(), leftAnkleAnchor.y(), leftKneeAnchor.x(), leftKneeAnchor.y()])
     leftUpperLeg.points([leftKneeAnchor.x(), leftKneeAnchor.y(), leftHipAnchor.x(), leftHipAnchor.y()])
     
@@ -362,8 +333,6 @@ function updateSkeletonLayerLocations () {
     leftForearm.points([leftWristAnchor.x(), leftWristAnchor.y(), leftElbowAnchor.x(), leftElbowAnchor.y()])
     leftUpperArm.points([leftElbowAnchor.x(), leftElbowAnchor.y(), leftShoulderAnchor.x(), leftShoulderAnchor.y()])
 
-
-   
     rightWristAnchor.absolutePosition({
         x: routeJson.poses[selectedPose].rightWrist.x,
         y: routeJson.poses[selectedPose].rightWrist.y
@@ -380,46 +349,23 @@ function updateSkeletonLayerLocations () {
     rightForearm.points([rightWristAnchor.x(), rightWristAnchor.y(), rightElbowAnchor.x(), rightElbowAnchor.y()])
     rightUpperArm.points([rightElbowAnchor.x(), rightElbowAnchor.y(), rightShoulderAnchor.x(), rightShoulderAnchor.y()])
 
-
     bodyAnchor.points([rightShoulderAnchor.x(), rightShoulderAnchor.y(), leftShoulderAnchor.x(), leftShoulderAnchor.y(), leftHipAnchor.x(), leftHipAnchor.y(), rightHipAnchor.x(), rightHipAnchor.y()])
     bodyGroup.x(routeJson.poses[selectedPose].body.x)
     bodyGroup.y(routeJson.poses[selectedPose].body.y)
-    layer.draw();
+    skeletonLayer.draw();
 }
+
 function makeSkeletonLayer () {
-    layer = new Konva.Layer()
+    skeletonLayer = new Konva.Layer()
 
     bodyGroup = new Konva.Group({
         draggable: true,
     });
-    bodyGroup.on('dragmove', function () {
+
+    bodyGroup.on('dragend', function () {
         routeJson.poses[selectedPose].body.x = bodyGroup.x()
         routeJson.poses[selectedPose].body.y = bodyGroup.y()
-        /*routeJson.poses[selectedPose].rightElbow.x = rightElbowAnchor.x()
-        routeJson.poses[selectedPose].rightElbow.y = rightElbowAnchor.y()
-        routeJson.poses[selectedPose].rightWrist.x = rightWristAnchor.x()
-        routeJson.poses[selectedPose].rightWrist.y = rightWristAnchor.y()
-        routeJson.poses[selectedPose].leftElbow.x = leftElbowAnchor.x()
-        routeJson.poses[selectedPose].leftElbow.y = leftElbowAnchor.y()
-        routeJson.poses[selectedPose].leftWrist.x = leftWristAnchor.x()
-        routeJson.poses[selectedPose].leftWrist.y = leftWristAnchor.y()
-        routeJson.poses[selectedPose].rightKnee.x = rightKneeAnchor.x()
-        routeJson.poses[selectedPose].rightKnee.y = rightKneeAnchor.y()
-        routeJson.poses[selectedPose].rightAnkle.x = rightAnkleAnchor.x()
-        routeJson.poses[selectedPose].rightAnkle.y = rightAnkleAnchor.y()
-        routeJson.poses[selectedPose].leftKnee.x = leftKneeAnchor.x()
-        routeJson.poses[selectedPose].leftKnee.y = leftKneeAnchor.y()
-        routeJson.poses[selectedPose].leftAnkle.x = leftAnkleAnchor.x()
-        routeJson.poses[selectedPose].leftAnkle.y = leftAnkleAnchor.y()
-        routeJson.poses[selectedPose].leftHip.x = leftHipAnchor.x()
-        routeJson.poses[selectedPose].leftHip.y = leftHipAnchor.y()
-        routeJson.poses[selectedPose].leftShoulder.x = leftShoulderAnchor.x()
-        routeJson.poses[selectedPose].leftShoulder.y = leftShoulderAnchor.y()
-        routeJson.poses[selectedPose].rightHip.x = rightHipAnchor.x()
-        routeJson.poses[selectedPose].rightHip.y = rightHipAnchor.y()
-        routeJson.poses[selectedPose].rightShoulder.x = rightShoulderAnchor.x()
-        routeJson.poses[selectedPose].rightShoulder.y = rightShoulderAnchor.y()
-    */})
+    })
 
     leftLowerLeg = new Konva.Line({
         points: [routeJson.poses[selectedPose].leftAnkle.x, routeJson.poses[selectedPose].leftAnkle.y, routeJson.poses[selectedPose].leftKnee.x, routeJson.poses[selectedPose].leftKnee.y],
@@ -652,13 +598,7 @@ function makeSkeletonLayer () {
         routeJson.poses[selectedPose].leftElbow.x = leftElbowAnchor.x()
         routeJson.poses[selectedPose].leftElbow.y = leftElbowAnchor.y()
     });
-    
-    
-
-    
-
-
-
+ 
     rightForearm = new Konva.Line({
         points: [routeJson.poses[selectedPose].rightWrist.x, routeJson.poses[selectedPose].rightWrist.y, routeJson.poses[selectedPose].rightElbow.x, routeJson.poses[selectedPose].rightElbow.y],
         stroke: 'blue',
@@ -741,28 +681,28 @@ function makeSkeletonLayer () {
 
     bodyGroup.add(bodyAnchor)
 
-    bodyGroup.add(leftAnkleAnchor)
-    bodyGroup.add(rightAnkleAnchor)
-    bodyGroup.add(leftKneeAnchor)
-    bodyGroup.add(rightKneeAnchor)
-    bodyGroup.add(leftHipAnchor)
-    bodyGroup.add(rightHipAnchor)
+    // bodyGroup.add(leftAnkleAnchor)
+    // bodyGroup.add(rightAnkleAnchor)
+    // bodyGroup.add(leftKneeAnchor)
+    // bodyGroup.add(rightKneeAnchor)
+    // bodyGroup.add(leftHipAnchor)
+    // bodyGroup.add(rightHipAnchor)
 
-    bodyGroup.add(leftShoulderAnchor)
-    bodyGroup.add(rightShoulderAnchor)
-    bodyGroup.add(leftElbowAnchor)
-    bodyGroup.add(rightElbowAnchor)
-    bodyGroup.add(leftWristAnchor)
-    bodyGroup.add(rightWristAnchor)
+    // bodyGroup.add(leftShoulderAnchor)
+    // bodyGroup.add(rightShoulderAnchor)
+    // bodyGroup.add(leftElbowAnchor)
+    // bodyGroup.add(rightElbowAnchor)
+    // bodyGroup.add(leftWristAnchor)
+    // bodyGroup.add(rightWristAnchor)
 
-    bodyGroup.add(leftUpperLeg)
-    bodyGroup.add(rightUpperLeg)
-    bodyGroup.add(leftLowerLeg)
-    bodyGroup.add(rightLowerLeg)
-    bodyGroup.add(leftUpperArm)
-    bodyGroup.add(rightUpperArm)
-    bodyGroup.add(leftForearm)
-    bodyGroup.add(rightForearm)
+    // bodyGroup.add(leftUpperLeg)
+    // bodyGroup.add(rightUpperLeg)
+    // bodyGroup.add(leftLowerLeg)
+    // bodyGroup.add(rightLowerLeg)
+    // bodyGroup.add(leftUpperArm)
+    // bodyGroup.add(rightUpperArm)
+    // bodyGroup.add(leftForearm)
+    // bodyGroup.add(rightForearm)
 
     bodyGroup.on('mouseover', function () {
         document.body.style.cursor = 'pointer';
@@ -772,7 +712,19 @@ function makeSkeletonLayer () {
         document.body.style.cursor = 'default';
     });
 
-    layer.add(bodyGroup)
+    let rotationTransformer = new Konva.Transformer({
+        nodes: [bodyGroup],
+        resizeEnabled: false,
+    })
+    skeletonLayer.add(rotationTransformer)
+
+    skeletonLayer.add(bodyGroup)
+
+    // Sets the rotation value of the body group 
+    bodyGroup.on('transformend', function() {
+        console.log("Setting rotation to " + bodyGroup.rotation() + " degrees.")
+        routeJson.poses[selectedPose].rotation = bodyGroup.rotation()
+    })
 
     leftUpperArm.moveToBottom()
     leftForearm.moveToBottom()
@@ -784,5 +736,5 @@ function makeSkeletonLayer () {
     rightLowerLeg.moveToBottom()
 
 
-    stage.add(layer)
+    stage.add(skeletonLayer)
 }

@@ -6,3 +6,10 @@ p {
     color: white;
     font-family: sans-serif;
 }
+
+body {
+    margin: 0;
+    padding: 0;
+    /* overflow: hidden; */
+    background-color: #f0f0f0;
+}
