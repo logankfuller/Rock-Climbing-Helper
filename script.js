@@ -6,7 +6,7 @@ let height = 720;
 let arrowLayer;
 let backwardArrow;
 let forwardArrow;
-
+let rotationTransformer;
 let stage = new Konva.Stage({
     container: 'container',
     width: width,
@@ -272,19 +272,15 @@ function updateSkeletonLayerLocations () {
     console.log("Transform: ", bodyGroup.getAbsoluteRotation())
 
     // Set the X/Y coordinates as well as rotation to what is stored in the selected poses routeJson.
+    
+    bodyGroup.rotation(0)
+    rotationTransformer.rotation(0)
     bodyGroup.absolutePosition({
-        x: routeJson.poses[selectedPose].body.x,
-        y: routeJson.poses[selectedPose].body.y
-    })
-    console.log("setting body group x position to " + routeJson.poses[selectedPose].body.x)
-    //bodyGroup.x(routeJson.poses[selectedPose].body.x)
-    console.log("setting body group y position to " + routeJson.poses[selectedPose].body.y)
-    //bodyGroup.y(routeJson.poses[selectedPose].body.y)
-    console.log("setting body group rotation to " + routeJson.poses[selectedPose].rotation)
-    bodyGroup.rotation(routeJson.poses[selectedPose].rotation)
+        x: 0,
+        y: 0
+    });
 
-    console.log("Position should be ", routeJson.poses[selectedPose].body)
-    console.log("But found it at: ", bodyGroup.position())
+    
     
     leftKneeAnchor.absolutePosition({
         x: routeJson.poses[selectedPose].leftKnee.x,
@@ -349,9 +345,25 @@ function updateSkeletonLayerLocations () {
     rightForearm.points([rightWristAnchor.x(), rightWristAnchor.y(), rightElbowAnchor.x(), rightElbowAnchor.y()])
     rightUpperArm.points([rightElbowAnchor.x(), rightElbowAnchor.y(), rightShoulderAnchor.x(), rightShoulderAnchor.y()])
 
+
+    
     bodyAnchor.points([rightShoulderAnchor.x(), rightShoulderAnchor.y(), leftShoulderAnchor.x(), leftShoulderAnchor.y(), leftHipAnchor.x(), leftHipAnchor.y(), rightHipAnchor.x(), rightHipAnchor.y()])
-    bodyGroup.x(routeJson.poses[selectedPose].body.x)
-    bodyGroup.y(routeJson.poses[selectedPose].body.y)
+    rotationTransformer.rotation(routeJson.poses[selectedPose].rotation)
+    bodyGroup.rotation(routeJson.poses[selectedPose].rotation)
+    bodyGroup.absolutePosition({
+        x: routeJson.poses[selectedPose].body.x,
+        y: routeJson.poses[selectedPose].body.y
+    });
+
+    console.log("setting body group x position to " + routeJson.poses[selectedPose].body.x)
+    //bodyGroup.x(routeJson.poses[selectedPose].body.x)
+    console.log("setting body group y position to " + routeJson.poses[selectedPose].body.y)
+    //bodyGroup.y(routeJson.poses[selectedPose].body.y)
+    console.log("setting body group rotation to " + routeJson.poses[selectedPose].rotation)
+
+    console.log("Position should be ", routeJson.poses[selectedPose].body)
+    console.log("But found it at: ", bodyGroup.position())
+
     skeletonLayer.draw();
 }
 
@@ -681,28 +693,28 @@ function makeSkeletonLayer () {
 
     bodyGroup.add(bodyAnchor)
 
-    // bodyGroup.add(leftAnkleAnchor)
-    // bodyGroup.add(rightAnkleAnchor)
-    // bodyGroup.add(leftKneeAnchor)
-    // bodyGroup.add(rightKneeAnchor)
-    // bodyGroup.add(leftHipAnchor)
-    // bodyGroup.add(rightHipAnchor)
+     bodyGroup.add(leftAnkleAnchor)
+     bodyGroup.add(rightAnkleAnchor)
+     bodyGroup.add(leftKneeAnchor)
+     bodyGroup.add(rightKneeAnchor)
+     bodyGroup.add(leftHipAnchor)
+     bodyGroup.add(rightHipAnchor)
 
-    // bodyGroup.add(leftShoulderAnchor)
-    // bodyGroup.add(rightShoulderAnchor)
-    // bodyGroup.add(leftElbowAnchor)
-    // bodyGroup.add(rightElbowAnchor)
-    // bodyGroup.add(leftWristAnchor)
-    // bodyGroup.add(rightWristAnchor)
+     bodyGroup.add(leftShoulderAnchor)
+     bodyGroup.add(rightShoulderAnchor)
+     bodyGroup.add(leftElbowAnchor)
+     bodyGroup.add(rightElbowAnchor)
+     bodyGroup.add(leftWristAnchor)
+     bodyGroup.add(rightWristAnchor)
 
-    // bodyGroup.add(leftUpperLeg)
-    // bodyGroup.add(rightUpperLeg)
-    // bodyGroup.add(leftLowerLeg)
-    // bodyGroup.add(rightLowerLeg)
-    // bodyGroup.add(leftUpperArm)
-    // bodyGroup.add(rightUpperArm)
-    // bodyGroup.add(leftForearm)
-    // bodyGroup.add(rightForearm)
+     bodyGroup.add(leftUpperLeg)
+     bodyGroup.add(rightUpperLeg)
+     bodyGroup.add(leftLowerLeg)
+     bodyGroup.add(rightLowerLeg)
+     bodyGroup.add(leftUpperArm)
+     bodyGroup.add(rightUpperArm)
+     bodyGroup.add(leftForearm)
+     bodyGroup.add(rightForearm)
 
     bodyGroup.on('mouseover', function () {
         document.body.style.cursor = 'pointer';
@@ -712,18 +724,26 @@ function makeSkeletonLayer () {
         document.body.style.cursor = 'default';
     });
 
-    let rotationTransformer = new Konva.Transformer({
+    rotationTransformer = new Konva.Transformer({
         nodes: [bodyGroup],
         resizeEnabled: false,
     })
+    
     skeletonLayer.add(rotationTransformer)
 
     skeletonLayer.add(bodyGroup)
 
     // Sets the rotation value of the body group 
-    bodyGroup.on('transformend', function() {
-        console.log("Setting rotation to " + bodyGroup.rotation() + " degrees.")
-        routeJson.poses[selectedPose].rotation = bodyGroup.rotation()
+    rotationTransformer.on('transformend', function() {
+        console.log("Setting rotation to " + rotationTransformer.rotation() + " degrees.")
+        console.log("Non absolute: ", bodyGroup.x(),", ",bodyGroup.y())
+        console.log ("Non absoulte: ", bodyGroup.rotation())
+        console.log("Absolute: ", bodyGroup.absolutePosition())
+        console.log("Absolute: ", bodyGroup.getAbsoluteRotation())
+
+        routeJson.poses[selectedPose].rotation = rotationTransformer.rotation()
+        routeJson.poses[selectedPose].body.x = bodyGroup.x()
+        routeJson.poses[selectedPose].body.y = bodyGroup.y()
     })
 
     leftUpperArm.moveToBottom()
