@@ -90,74 +90,15 @@ let routeJson = {
 let skeletonLayer, bodyGroup, leftLowerLeg, leftUpperLeg, leftAnkleAnchor, leftKneeAnchor, leftHipAnchor, rightLowerLeg, rightUpperLeg, rightAnkleAnchor, rightKneeAnchor, rightHipAnchor, leftForearm, leftUpperArm, leftWristAnchor, leftElbowAnchor, leftShoulderAnchor, rightForearm, rightUpperArm, rightWristAnchor, rightElbowAnchor, rightShoulderAnchor, bodyAnchor; 
 
 function setup() {
-    createCanvas(width, height);
-    img = createImg('data/route.jpg', imageReady);
-    img.size(width, height);
-    img.hide(); // hide the image in the browser
-    frameRate(1); // set the frameRate to 1 since we don't need it to be running quickly in this case
-}
-
-function imageReady() {
-    let options = {
-        imageScaleFactor: 1,
-        minConfidence: 0.1
-    }
-    poseNet = ml5.poseNet(modelReady, options);
-
-    poseNet.on('pose', function (results) {
-        poses = results;
-    });
-}
-
-function modelReady() {
-    select('#status').html('Model Loaded');
-    poseNet.singlePose(img)
-}
-
-function draw() {
-    if (poses.length > 0) {
-        initJson()
-        initCanvas();
-        noLoop();
-    }
+    // Retrieve the JSON string
+    var jsonString = localStorage.getItem("routeJson");
+    
+    // Parse the JSON string back to JS object
+    routeJson = JSON.parse(jsonString);
 }
 
 function calcMaxLength (a, b) {
     return Math.sqrt(Math.pow(a.x-b.x, 2) + (Math.pow(a.y-b.y, 2)))
-}
-
-/** 
- * Initializes the JSON by calculating the limb length limits, and default pose coordinates
- */
-function initJson() {
-    for(pose in defaultPose) {
-        if(pose in poses[selectedPose].pose) {
-            defaultPose[pose] = poses[selectedPose].pose[pose]
-        }
-    }
-
-    routeJson.poses.push(JSON.parse(JSON.stringify(defaultPose)))
-    routeJson.poses.push(JSON.parse(JSON.stringify(defaultPose)))
-
-    // Calculate and assign limb length limits
-    routeJson.stickmanLimits.rightCalf = calcMaxLength(defaultPose.rightAnkle, defaultPose.rightKnee)
-    routeJson.stickmanLimits.rightThigh = calcMaxLength(defaultPose.rightHip, defaultPose.rightKnee)
-    routeJson.stickmanLimits.leftCalf = calcMaxLength(defaultPose.leftAnkle, defaultPose.leftKnee)
-    routeJson.stickmanLimits.leftThigh = calcMaxLength(defaultPose.leftHip, defaultPose.leftKnee)
-    routeJson.stickmanLimits.leftUpperArm = calcMaxLength(defaultPose.leftShoulder, defaultPose.leftElbow)
-    routeJson.stickmanLimits.leftForearm = calcMaxLength(defaultPose.leftElbow, defaultPose.leftWrist)
-    routeJson.stickmanLimits.rightUpperArm = calcMaxLength(defaultPose.rightShoulder, defaultPose.rightElbow)
-    routeJson.stickmanLimits.rightForearm = calcMaxLength(defaultPose.rightElbow, defaultPose.rightWrist)
-
-    // Calculate and assign bodyWidth limit
-    let bodyWidth = (calcMaxLength(defaultPose.leftShoulder, defaultPose.rightShoulder) + calcMaxLength(defaultPose.leftHip, defaultPose.rightHip)) / 2
-    routeJson.stickmanLimits.bodyWidth = bodyWidth
-
-    // Calculate and assign bodyHeight limit
-    let bodyHeight = (calcMaxLength(defaultPose.leftShoulder, defaultPose.leftHip) + calcMaxLength(defaultPose.rightShoulder, defaultPose.rightHip)) / 2
-    routeJson.stickmanLimits.bodyHeight = bodyHeight
-
-    console.log("Finished initializing JSON: ", routeJson)
 }
 
 /**
@@ -727,3 +668,7 @@ function makeSkeletonLayer () {
 
     stage.add(skeletonLayer)
 }
+
+
+setup();
+initCanvas();
