@@ -109,7 +109,6 @@ function imageReady() {
 }
 
 function modelReady() {
-    select('#status').html('Model Loaded');
     poseNet.singlePose(img)
 }
 
