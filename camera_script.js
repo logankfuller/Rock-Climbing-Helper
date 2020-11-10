@@ -3,6 +3,7 @@ let selectedPose = 0;
 let poseText;
 let width = 515;
 let height = 720;
+let nextButton, declineText, acceptText;
 let stage = new Konva.Stage({
     container: 'container',
     width: width,
@@ -159,6 +160,26 @@ function calcLimits() {
     let bodyHeight = (calcMaxLength(routeJson.poses[selectedPose].leftShoulder, routeJson.poses[selectedPose].leftHip) + calcMaxLength(routeJson.poses[selectedPose].rightShoulder, routeJson.poses[selectedPose].rightHip)) / 2
     routeJson.stickmanLimits.bodyHeight = bodyHeight
 }
+
+function setDraggable (isDraggable){
+    leftHipAnchor.draggable(isDraggable)
+    leftKneeAnchor.draggable(isDraggable)
+    leftAnkleAnchor.draggable(isDraggable)
+
+    rightHipAnchor.draggable(isDraggable)
+    rightKneeAnchor.draggable(isDraggable)
+    rightAnkleAnchor.draggable(isDraggable)
+
+    leftShoulderAnchor.draggable(isDraggable)
+    leftElbowAnchor.draggable(isDraggable)
+    leftWristAnchor.draggable(isDraggable)
+
+    rightShoulderAnchor.draggable(isDraggable)
+    rightElbowAnchor.draggable(isDraggable)
+    rightWristAnchor.draggable(isDraggable)
+
+    bodyGroup.draggable(isDraggable)
+}
 /**
  * Initializes the canvas and adds the route image, forward/backward arrows, and status text to the canvas.
  */
@@ -186,6 +207,40 @@ function initCanvas() {
     makeSkeletonLayer()
 
     let controlLayer = new Konva.Layer();
+    acceptText = new Konva.Text({
+        x: (width/2)+100,
+        y: stage.height()-60,
+        text:"Accept",
+        fontSize: 30,
+        fontFamily: 'Sans-serif',
+        fill: 'Green',
+        opacity: 0.0
+    });
+    acceptText.on('click', function () {
+        calcLimits();
+        localStorage.setItem("routeJson", JSON.stringify(routeJson));
+        window.location.href = "edit_page.html";
+      }) 
+    declineText = new Konva.Text({
+        x: (width/2)-200,
+        y: stage.height()-60,
+        text:"Reject",
+        fontSize: 30,
+        fontFamily: 'Sans-serif',
+        fill: 'Red',
+        opacity: 0.0
+    });
+    declineText.on('click', function () {
+        if (acceptText.opacity != 0.0) {
+            nextButton.opacity(1.0)
+            declineText.opacity(0.0)
+            acceptText.opacity(0.0)
+            routeJson.poses[selectedPose] = JSON.parse(JSON.stringify(defaultPose))
+            updateSkeletonLayerLocations()
+            setDraggable(false)
+            controlLayer.draw()
+        }
+      }) 
     let backSquare = new Konva.Rect({
         x: 0,
         y: height-100,
@@ -195,7 +250,7 @@ function initCanvas() {
         opacity: 0.5,
         strokeWidth: 4
       });
-    let nextButton = new Konva.Circle({
+    nextButton = new Konva.Circle({
         x: width/2,
         y: height-50,
         radius: 25,
@@ -204,13 +259,109 @@ function initCanvas() {
         strokeWidth: 2
     })
     nextButton.on('click', function() {
-        calcLimits();
-        localStorage.setItem("routeJson", JSON.stringify(routeJson));
-        window.location.href = "edit_page.html";
+        print('a')
+        if (nextButton.opacity != 0.0) {
+            print('o')
+            nextButton.opacity(0.0)
+            declineText.opacity(1.0)
+            acceptText.opacity(1.0)
+            setDraggable(true)
+            controlLayer.draw()
+        }
     })
     controlLayer.add(backSquare)
     controlLayer.add(nextButton)
+    controlLayer.add(declineText)
+    controlLayer.add(acceptText)
+
+    
     stage.add(controlLayer)
+}
+
+function updateSkeletonLayerLocations () {
+    // Set the X/Y coordinates as well as rotation to what is stored in the selected poses routeJson.
+    
+    // This "resets" the location and rotation for the body group
+    // so that we can add a different location/rotation at the end
+    bodyGroup.rotation(0)
+    bodyGroup.absolutePosition({
+        x: 0,
+        y: 0
+    });
+
+    // Set the anchors to the desired locations and then the limbs match the anchors
+    leftKneeAnchor.absolutePosition({
+        x: routeJson.poses[selectedPose].leftKnee.x,
+        y: routeJson.poses[selectedPose].leftKnee.y
+    });
+    leftHipAnchor.absolutePosition({
+        x: routeJson.poses[selectedPose].leftHip.x,
+        y: routeJson.poses[selectedPose].leftHip.y
+    });
+    leftAnkleAnchor.absolutePosition({
+        x: routeJson.poses[selectedPose].leftAnkle.x,
+        y: routeJson.poses[selectedPose].leftAnkle.y
+    });
+    leftLowerLeg.points([leftAnkleAnchor.x(), leftAnkleAnchor.y(), leftKneeAnchor.x(), leftKneeAnchor.y()])
+    leftUpperLeg.points([leftKneeAnchor.x(), leftKneeAnchor.y(), leftHipAnchor.x(), leftHipAnchor.y()])
+    
+    rightAnkleAnchor.absolutePosition({
+        x: routeJson.poses[selectedPose].rightAnkle.x,
+        y: routeJson.poses[selectedPose].rightAnkle.y
+      });
+    rightKneeAnchor.absolutePosition({
+        x: routeJson.poses[selectedPose].rightKnee.x,
+        y: routeJson.poses[selectedPose].rightKnee.y
+      });
+    rightHipAnchor.absolutePosition({
+        x: routeJson.poses[selectedPose].rightHip.x,
+        y: routeJson.poses[selectedPose].rightHip.y
+    });
+    rightLowerLeg.points([rightAnkleAnchor.x(), rightAnkleAnchor.y(), rightKneeAnchor.x(), rightKneeAnchor.y()])
+    rightUpperLeg.points([rightKneeAnchor.x(), rightKneeAnchor.y(), rightHipAnchor.x(), rightHipAnchor.y()])
+    
+    leftWristAnchor.absolutePosition({
+        x: routeJson.poses[selectedPose].leftWrist.x,
+        y: routeJson.poses[selectedPose].leftWrist.y
+      });
+    leftElbowAnchor.absolutePosition({
+        x: routeJson.poses[selectedPose].leftElbow.x,
+        y: routeJson.poses[selectedPose].leftElbow.y
+      });
+    leftShoulderAnchor.absolutePosition({
+        x: routeJson.poses[selectedPose].leftShoulder.x,
+        y: routeJson.poses[selectedPose].leftShoulder.y
+    });
+    leftForearm.points([leftWristAnchor.x(), leftWristAnchor.y(), leftElbowAnchor.x(), leftElbowAnchor.y()])
+    leftUpperArm.points([leftElbowAnchor.x(), leftElbowAnchor.y(), leftShoulderAnchor.x(), leftShoulderAnchor.y()])
+
+    rightWristAnchor.absolutePosition({
+        x: routeJson.poses[selectedPose].rightWrist.x,
+        y: routeJson.poses[selectedPose].rightWrist.y
+      });
+    rightElbowAnchor.absolutePosition({
+        x: routeJson.poses[selectedPose].rightElbow.x,
+        y: routeJson.poses[selectedPose].rightElbow.y
+      });
+    rightShoulderAnchor.absolutePosition({
+        x: routeJson.poses[selectedPose].rightShoulder.x,
+        y: routeJson.poses[selectedPose].rightShoulder.y
+    });
+    rightForearm.points([rightWristAnchor.x(), rightWristAnchor.y(), rightElbowAnchor.x(), rightElbowAnchor.y()])
+    rightUpperArm.points([rightElbowAnchor.x(), rightElbowAnchor.y(), rightShoulderAnchor.x(), rightShoulderAnchor.y()])
+
+
+    //Body anchor is based on the anchor points
+    bodyAnchor.points([rightShoulderAnchor.x(), rightShoulderAnchor.y(), leftShoulderAnchor.x(), leftShoulderAnchor.y(), leftHipAnchor.x(), leftHipAnchor.y(), rightHipAnchor.x(), rightHipAnchor.y()])
+    
+    // that were placed locally, and then moves them to where they need to be
+    bodyGroup.rotation(routeJson.poses[selectedPose].rotation)
+    bodyGroup.absolutePosition({
+        x: routeJson.poses[selectedPose].body.x,
+        y: routeJson.poses[selectedPose].body.y
+    });
+
+    skeletonLayer.draw();
 }
 
 function makeSkeletonLayer () {
@@ -641,7 +792,7 @@ function makeSkeletonLayer () {
     rightLowerLeg.moveToBottom()
 
 
-
+    setDraggable(false)
 
     stage.add(skeletonLayer)
 }
