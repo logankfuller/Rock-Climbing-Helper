@@ -135,29 +135,30 @@ function initJson() {
     }
 
     routeJson.poses.push(JSON.parse(JSON.stringify(defaultPose)))
-    routeJson.poses.push(JSON.parse(JSON.stringify(defaultPose)))
-
-    // Calculate and assign limb length limits
-    routeJson.stickmanLimits.rightCalf = calcMaxLength(defaultPose.rightAnkle, defaultPose.rightKnee)
-    routeJson.stickmanLimits.rightThigh = calcMaxLength(defaultPose.rightHip, defaultPose.rightKnee)
-    routeJson.stickmanLimits.leftCalf = calcMaxLength(defaultPose.leftAnkle, defaultPose.leftKnee)
-    routeJson.stickmanLimits.leftThigh = calcMaxLength(defaultPose.leftHip, defaultPose.leftKnee)
-    routeJson.stickmanLimits.leftUpperArm = calcMaxLength(defaultPose.leftShoulder, defaultPose.leftElbow)
-    routeJson.stickmanLimits.leftForearm = calcMaxLength(defaultPose.leftElbow, defaultPose.leftWrist)
-    routeJson.stickmanLimits.rightUpperArm = calcMaxLength(defaultPose.rightShoulder, defaultPose.rightElbow)
-    routeJson.stickmanLimits.rightForearm = calcMaxLength(defaultPose.rightElbow, defaultPose.rightWrist)
-
-    // Calculate and assign bodyWidth limit
-    let bodyWidth = (calcMaxLength(defaultPose.leftShoulder, defaultPose.rightShoulder) + calcMaxLength(defaultPose.leftHip, defaultPose.rightHip)) / 2
-    routeJson.stickmanLimits.bodyWidth = bodyWidth
-
-    // Calculate and assign bodyHeight limit
-    let bodyHeight = (calcMaxLength(defaultPose.leftShoulder, defaultPose.leftHip) + calcMaxLength(defaultPose.rightShoulder, defaultPose.rightHip)) / 2
-    routeJson.stickmanLimits.bodyHeight = bodyHeight
+    calcLimits()
+    
+    
 
     console.log("Finished initializing JSON: ", routeJson)
 }
+function calcLimits() {
+    // Calculate and assign limb length limits
+    routeJson.stickmanLimits.rightCalf = calcMaxLength(routeJson.poses[selectedPose].rightAnkle, routeJson.poses[selectedPose].rightKnee)
+    routeJson.stickmanLimits.rightThigh = calcMaxLength(routeJson.poses[selectedPose].rightHip, routeJson.poses[selectedPose].rightKnee)
+    routeJson.stickmanLimits.leftCalf = calcMaxLength(routeJson.poses[selectedPose].leftAnkle, routeJson.poses[selectedPose].leftKnee)
+    routeJson.stickmanLimits.leftThigh = calcMaxLength(routeJson.poses[selectedPose].leftHip, routeJson.poses[selectedPose].leftKnee)
+    routeJson.stickmanLimits.leftUpperArm = calcMaxLength(routeJson.poses[selectedPose].leftShoulder, routeJson.poses[selectedPose].leftElbow)
+    routeJson.stickmanLimits.leftForearm = calcMaxLength(routeJson.poses[selectedPose].leftElbow, routeJson.poses[selectedPose].leftWrist)
+    routeJson.stickmanLimits.rightUpperArm = calcMaxLength(routeJson.poses[selectedPose].rightShoulder, routeJson.poses[selectedPose].rightElbow)
+    routeJson.stickmanLimits.rightForearm = calcMaxLength(routeJson.poses[selectedPose].rightElbow, routeJson.poses[selectedPose].rightWrist)
+    // Calculate and assign bodyWidth limit
+    let bodyWidth = (calcMaxLength(routeJson.poses[selectedPose].leftShoulder, routeJson.poses[selectedPose].rightShoulder) + calcMaxLength(routeJson.poses[selectedPose].leftHip, routeJson.poses[selectedPose].rightHip)) / 2
+    routeJson.stickmanLimits.bodyWidth = bodyWidth
 
+    // Calculate and assign bodyHeight limit
+    let bodyHeight = (calcMaxLength(routeJson.poses[selectedPose].leftShoulder, routeJson.poses[selectedPose].leftHip) + calcMaxLength(routeJson.poses[selectedPose].rightShoulder, routeJson.poses[selectedPose].rightHip)) / 2
+    routeJson.stickmanLimits.bodyHeight = bodyHeight
+}
 /**
  * Initializes the canvas and adds the route image, forward/backward arrows, and status text to the canvas.
  */
@@ -203,7 +204,7 @@ function initCanvas() {
         strokeWidth: 2
     })
     nextButton.on('click', function() {
-        print("ah")
+        calcLimits();
         localStorage.setItem("routeJson", JSON.stringify(routeJson));
         window.location.href = "edit_page.html";
     })

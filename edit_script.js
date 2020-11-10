@@ -131,7 +131,9 @@ function initCanvas() {
     // and the page indicator
     arrowLayer = new Konva.Layer();
     //poseText tells the user what pose they are currently on
-    poseText = new Konva.Text({
+    arrowLayer = new Konva.Layer();
+
+    simpleText = new Konva.Text({
         x: stage.width()-75,
         y: stage.height()-50,
         text:""+(selectedPose+1)+"/"+routeJson.poses.length,
@@ -139,6 +141,28 @@ function initCanvas() {
         fontFamily: 'Sans-serif',
         fill: 'White',
       });
+
+
+    deleteText = new Konva.Text({
+        x: stage.width()-(170 ),
+        y: stage.height()-50,
+        text:"Delete",
+        fontSize: 30,
+        fontFamily: 'Sans-serif',
+        fill: 'Red',
+      });
+      deleteText.on('click', function () {
+          if (routeJson.poses.length > 1) {
+                routeJson.poses = routeJson.poses.filter(item => item !== routeJson.poses[selectedPose])
+              if (selectedPose > 0) {
+                  selectedPose--
+              }
+              checkArrows();
+              updateSkeletonLayerLocations();
+              arrowLayer.draw();
+          }
+      })
+    
     forwardArrow = new Konva.Wedge({
       x: stage.width()-5,
       y: stage.height() / 2,
@@ -149,14 +173,51 @@ function initCanvas() {
       strokeWidth: 4,
       rotation: 150,
     });
+
     forwardArrow.on('click', function () {
         if (selectedPose < routeJson.poses.length-1)
             selectedPose++
-        poseText.text(`${selectedPose + 1}/${routeJson.poses.length}`)
         checkArrows();
         arrowLayer.draw()
         updateSkeletonLayerLocations()
     })
+
+
+    addVerticalLine = new Konva.Line({
+        points: [width-50, (height/2)-30, width-50, (height/2)+30],
+        stroke: 'white',
+        strokeWidth: 10,
+      });
+      
+    addVerticalLine.on('click', function () {
+        if (addVerticalLine.opacity() > 0) {
+          routeJson.poses.push(JSON.parse(JSON.stringify(routeJson.poses[selectedPose])))
+          selectedPose++
+          checkArrows();
+          arrowLayer.draw()
+          updateSkeletonLayerLocations()
+        }
+    })
+
+    addHorizontalLine = new Konva.Line({
+        points: [width-20, (height/2), width-80, (height/2)],
+        stroke: 'white',
+        strokeWidth: 10,
+      });
+      
+    addHorizontalLine.on('click', function () {
+        if (addHorizontalLine.opacity() > 0) {
+          routeJson.poses.push(JSON.parse(JSON.stringify(routeJson.poses[selectedPose])))
+          selectedPose++
+          simpleText.text(""+(selectedPose+1)+"/"+routeJson.poses.length)
+          checkArrows();
+          arrowLayer.draw()
+          updateSkeletonLayerLocations()
+    }
+    })
+
+    
+
     backwardArrow = new Konva.Wedge({
         x: 5,
         y: stage.height() / 2,
@@ -167,25 +228,28 @@ function initCanvas() {
         strokeWidth: 4,
         rotation: 330,
       });
-    backwardArrow.on('click', function () {
-        if (selectedPose > 0)
-            selectedPose--;
-        poseText.text(`${selectedPose + 1}/${routeJson.poses.length}`)
-        checkArrows();
-        arrowLayer.draw()
-        updateSkeletonLayerLocations();
-    })
-    checkArrows();
-
+      backwardArrow.on('click', function () {
+          if (selectedPose > 0)
+                selectedPose--;
+          simpleText.text(""+(selectedPose+1)+"/"+routeJson.poses.length)
+          checkArrows();
+          arrowLayer.draw()
+          updateSkeletonLayerLocations();
+      })
+      checkArrows();
+    // add the shape to the layer
     arrowLayer.add(forwardArrow);
     arrowLayer.add(backwardArrow);
-    arrowLayer.add(poseText);
-
+    arrowLayer.add(addVerticalLine);
+    arrowLayer.add(addHorizontalLine);
+    arrowLayer.add(simpleText);
+    arrowLayer.add(deleteText);
+    // add the layer to the stage
     stage.add(arrowLayer);
+    
 }
-
-// Checks to see whether or not the forward/previous arrow should be visible.
 function checkArrows () {
+    simpleText.text(""+(selectedPose+1)+"/"+routeJson.poses.length)
     if (selectedPose == 0) {
         backwardArrow.opacity(0.0);
     } else {
@@ -193,8 +257,15 @@ function checkArrows () {
     }
     if (selectedPose == (routeJson.poses.length-1)) {
         forwardArrow.opacity(0.0);
+        forwardArrow.moveToBottom();
+        addVerticalLine.opacity(1.0);
+        addHorizontalLine.opacity(1.0);
     } else {
         forwardArrow.opacity(1.0);
+        addVerticalLine.opacity(0.0);
+        addHorizontalLine.opacity(0.0);
+        addVerticalLine.moveToBottom();
+        addHorizontalLine.moveToBottom();
     }
 }
 
