@@ -376,8 +376,8 @@ function makeSkeletonLayer () {
             var scale = radius / Math.sqrt(Math.pow(pos.x - x, 2) + Math.pow(pos.y - y, 2));
             if (scale < 1)
                 return {
-                y: Math.round((pos.y - y) * scale + y),
-                x: Math.round((pos.x - x) * scale + x),
+                    y: Math.round((pos.y - y) * scale + y),
+                    x: Math.round((pos.x - x) * scale + x),
                 };
             else return pos;
         },
@@ -402,6 +402,19 @@ function makeSkeletonLayer () {
         fill: '#ddd',
         strokeWidth: 2,
         draggable: true,
+        dragBoundFunc: function (pos) {
+            var x = leftHipAnchor.absolutePosition().x;
+            var y = leftHipAnchor.absolutePosition().y;
+            var radius = routeJson.stickmanLimits.leftThigh;
+            var scale = radius / Math.sqrt(Math.pow(pos.x - x, 2) + Math.pow(pos.y - y, 2));
+            if (scale < 1) {
+                return {
+                    y: Math.round((pos.y - y) * scale + y),
+                    x: Math.round((pos.x - x) * scale + x),
+                };
+            }
+            else return pos;
+        },
     })
 
     leftKneeAnchor.on('dragmove', function() {
@@ -453,6 +466,19 @@ function makeSkeletonLayer () {
         fill: '#ddd',
         strokeWidth: 2,
         draggable: true,
+        dragBoundFunc: function (pos) {
+            var x = rightKneeAnchor.absolutePosition().x;
+            var y = rightKneeAnchor.absolutePosition().y;
+            var radius = routeJson.stickmanLimits.rightCalf;
+            var scale = radius / Math.sqrt(Math.pow(pos.x - x, 2) + Math.pow(pos.y - y, 2));
+            if (scale < 1) {
+                return {
+                    y: Math.round((pos.y - y) * scale + y),
+                    x: Math.round((pos.x - x) * scale + x),
+                };
+            }
+            else return pos;
+        },
     })
 
     rightAnkleAnchor.on('dragmove', function() {
@@ -474,6 +500,19 @@ function makeSkeletonLayer () {
         fill: '#ddd',
         strokeWidth: 2,
         draggable: true,
+        dragBoundFunc: function (pos) {
+            var x = rightHipAnchor.absolutePosition().x;
+            var y = rightHipAnchor.absolutePosition().y;
+            var radius = routeJson.stickmanLimits.rightThigh;
+            var scale = radius / Math.sqrt(Math.pow(pos.x - x, 2) + Math.pow(pos.y - y, 2));
+            if (scale < 1) {
+                return {
+                    y: Math.round((pos.y - y) * scale + y),
+                    x: Math.round((pos.x - x) * scale + x),
+                };
+            }
+            else return pos;
+        },
     })
 
     rightKneeAnchor.on('dragmove', function() {
@@ -525,6 +564,19 @@ function makeSkeletonLayer () {
         fill: '#ddd',
         strokeWidth: 2,
         draggable: true,
+        dragBoundFunc: function (pos) {
+            var x = leftElbowAnchor.absolutePosition().x;
+            var y = leftElbowAnchor.absolutePosition().y;
+            var radius = routeJson.stickmanLimits.leftForearm;
+            var scale = radius / Math.sqrt(Math.pow(pos.x - x, 2) + Math.pow(pos.y - y, 2));
+            if (scale < 1) {
+                return {
+                    y: Math.round((pos.y - y) * scale + y),
+                    x: Math.round((pos.x - x) * scale + x),
+                };
+            }
+            else return pos;
+        },
     })
 
     leftWristAnchor.on('dragmove', function() {
@@ -546,6 +598,19 @@ function makeSkeletonLayer () {
         fill: '#ddd',
         strokeWidth: 2,
         draggable: true,
+        dragBoundFunc: function (pos) {
+            var x = leftShoulderAnchor.absolutePosition().x;
+            var y = leftShoulderAnchor.absolutePosition().y;
+            var radius = routeJson.stickmanLimits.leftUpperArm;
+            var scale = radius / Math.sqrt(Math.pow(pos.x - x, 2) + Math.pow(pos.y - y, 2));
+            if (scale < 1) {
+                return {
+                    y: Math.round((pos.y - y) * scale + y),
+                    x: Math.round((pos.x - x) * scale + x),
+                };
+            }
+            else return pos;
+        },
     })
     
     leftShoulderAnchor = new Konva.Circle({
@@ -596,6 +661,19 @@ function makeSkeletonLayer () {
         fill: '#ddd',
         strokeWidth: 2,
         draggable: true,
+        dragBoundFunc: function (pos) {
+            var x = rightElbowAnchor.absolutePosition().x;
+            var y = rightElbowAnchor.absolutePosition().y;
+            var radius = routeJson.stickmanLimits.rightForearm;
+            var scale = radius / Math.sqrt(Math.pow(pos.x - x, 2) + Math.pow(pos.y - y, 2));
+            if (scale < 1) {
+                return {
+                    y: Math.round((pos.y - y) * scale + y),
+                    x: Math.round((pos.x - x) * scale + x),
+                };
+            }
+            else return pos;
+        },
     })
 
     rightWristAnchor.on('dragmove', function() {
@@ -617,6 +695,19 @@ function makeSkeletonLayer () {
         fill: '#ddd',
         strokeWidth: 2,
         draggable: true,
+        dragBoundFunc: function (pos) {
+            var x = rightShoulderAnchor.absolutePosition().x;
+            var y = rightShoulderAnchor.absolutePosition().y;
+            var radius = routeJson.stickmanLimits.rightUpperArm;
+            var scale = radius / Math.sqrt(Math.pow(pos.x - x, 2) + Math.pow(pos.y - y, 2));
+            if (scale < 1) {
+                return {
+                    y: Math.round((pos.y - y) * scale + y),
+                    x: Math.round((pos.x - x) * scale + x),
+                };
+            }
+            else return pos;
+        },
     })
 
     rightElbowAnchor.on('dragmove', function() {
