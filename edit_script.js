@@ -64,6 +64,14 @@ let defaultPose =  {
     "body" : {
         "x": 0,
         "y": 0
+    },
+    "head": {
+        "x": 0,
+        "y": 0
+    },
+    "nose": {
+        "x": 0,
+        "y": 0
     }
 }
 
@@ -803,6 +811,15 @@ function makeSkeletonLayer () {
         stroke: 'black',
         fill: '#000',
         strokeWidth: 5,
+        opacity: 0.5
+    })
+
+    head = new Konva.Circle({
+        x: (leftShoulderAnchor.x() + rightShoulderAnchor.x()) / 2,
+        y: routeJson.poses[selectedPose].nose.y,
+        radius: 20,
+        fill: 'black',
+        opacity: 0.5
     })
 
     /** 
@@ -811,6 +828,8 @@ function makeSkeletonLayer () {
 
     // Body
     bodyGroup.add(bodyAnchor)
+
+    bodyGroup.add(head)
 
     // Left/right arm(s)
     bodyGroup.add(leftUpperArm)

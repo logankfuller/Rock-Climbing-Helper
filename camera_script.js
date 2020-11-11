@@ -64,6 +64,14 @@ let defaultPose =  {
     "body" : {
         "x": 0,
         "y": 0
+    },
+    "head": {
+        "x": 0,
+        "y": 0
+    },
+    "nose": {
+        "x": 0,
+        "y": 0
     }
 }
 
@@ -87,10 +95,10 @@ let routeJson = {
     ]
 }
 
-let skeletonLayer, bodyGroup, leftLowerLeg, leftUpperLeg, leftAnkleAnchor, leftKneeAnchor, leftHipAnchor, rightLowerLeg, rightUpperLeg, rightAnkleAnchor, rightKneeAnchor, rightHipAnchor, leftForearm, leftUpperArm, leftWristAnchor, leftElbowAnchor, leftShoulderAnchor, rightForearm, rightUpperArm, rightWristAnchor, rightElbowAnchor, rightShoulderAnchor, bodyAnchor; 
+let skeletonLayer, bodyGroup, head, leftLowerLeg, leftUpperLeg, leftAnkleAnchor, leftKneeAnchor, leftHipAnchor, rightLowerLeg, rightUpperLeg, rightAnkleAnchor, rightKneeAnchor, rightHipAnchor, leftForearm, leftUpperArm, leftWristAnchor, leftElbowAnchor, leftShoulderAnchor, rightForearm, rightUpperArm, rightWristAnchor, rightElbowAnchor, rightShoulderAnchor, bodyAnchor; 
 
 function setup() {
-    createCanvas(width, height);
+    createCanvas(0, 0);
     img = createImg('data/route.jpg', imageReady);
     img.size(width, height);
     img.hide(); // hide the image in the browser
@@ -194,8 +202,8 @@ function initCanvas() {
         x: 0,
         y: 0,
         image: imageObj,
-        width: 515,
-        height: 720,
+        width: width,
+        height: height,
       });
 
       imageLayer.add(route);
@@ -751,9 +759,20 @@ function makeSkeletonLayer () {
         stroke: 'black',
         fill: '#000',
         strokeWidth: 5,
+        opacity: 0.5
+    })
+
+    head = new Konva.Circle({
+        x: (leftShoulderAnchor.x() + rightShoulderAnchor.x()) / 2,
+        y: routeJson.poses[selectedPose].nose.y,
+        radius: 20,
+        fill: 'black',
+        opacity: 0.5
     })
 
     bodyGroup.add(bodyAnchor)
+
+    bodyGroup.add(head)
 
      bodyGroup.add(leftAnkleAnchor)
      bodyGroup.add(rightAnkleAnchor)
