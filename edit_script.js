@@ -99,15 +99,23 @@ let routeJson = {
 let skeletonLayer, bodyGroup, leftLowerLeg, leftUpperLeg, leftAnkleAnchor, leftKneeAnchor, leftHipAnchor, rightLowerLeg, rightUpperLeg, rightAnkleAnchor, rightKneeAnchor, rightHipAnchor, leftForearm, leftUpperArm, leftWristAnchor, leftElbowAnchor, leftShoulderAnchor, rightForearm, rightUpperArm, rightWristAnchor, rightElbowAnchor, rightShoulderAnchor, bodyAnchor; 
 
 function setup() {
-    // Retrieve the JSON string
-    var jsonString = localStorage.getItem("routeJson");
-    
-    // Parse the JSON string back to JS object
-    routeJson = JSON.parse(jsonString);
+    createCanvas(0, 0);
+    img = createImg(imageSrc);
+    img.size(width, height);
+    img.hide(); // hide the image in the browser
+    frameRate(1);
 }
 
 function calcMaxLength (a, b) {
     return Math.sqrt(Math.pow(a.x-b.x, 2) + (Math.pow(a.y-b.y, 2)))
+}
+
+function initJson() {
+    // Retrieve the JSON string
+    var jsonString = localStorage.getItem("routeJson");
+
+    // Parse the JSON string back to JS object
+    routeJson = JSON.parse(jsonString);
 }
 
 /**
@@ -893,8 +901,7 @@ function makeSkeletonLayer () {
 
     // Finally, add the entire skeletonLayer to the canvas stage.
     stage.add(skeletonLayer)
+
 }
-
-
-setup();
+initJson();
 initCanvas();
