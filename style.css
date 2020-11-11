@@ -1,12 +1,74 @@
 .topBar {
-    background-color: #333;
+    background-color: #008EBB;
     overflow: hidden;
+    width: 515;
+    height: 75;
+    display: flex;
+    align-items: center;
+}
+.bottomBar {
+    background-color: #dddddd;
+    overflow: hidden;
+    width: 515;
+    height: 75;
+    display: flex;
+    align-items: center;
+}
+#backButton {
+    font-size: 40;
+    line-height: 0%;
+    width: 80;
+    text-align: center;
+    color: white;
+    text-decoration: none;
 }
 p {
     color: white;
     font-family: sans-serif;
+    font-size: 20;
+    margin-right: 10px;
+}
+#exclaimation {
+    font-size: 40;
+    line-height: 0%;
+    width: 80;
+    text-align: center;
+}
+.bottomItem {
+    width: 25%;
+    height: 100%;
+    display: flex;
+    align-content: center;
+    flex-flow: column;
+}
+.poseDesc {
+    resize: none;
+    font-size: 50;
 }
 
+.bottomItem p{
+    width: 100%;
+    color: #777777;
+    text-align: center;
+    padding-bottom: 5%;
+    padding-top: 0%;
+    margin-top: 4%;
+}
+.bottomItem:first-of-type {
+    background-color: #008EBB;
+}
+.bottomItem .selectedText {
+    color: white;
+}
+.unselectedImg, .selectedImg {
+    max-height: 40px;
+    max-width: 40px;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    width: auto;
+    height: auto;
+}
 body {
     margin: 0;
     padding: 0;
