@@ -175,8 +175,13 @@ function initCanvas() {
     });
 
     forwardArrow.on('click', function () {
+        var t = document.getElementById("poseDesc");
+        routeJson.poses[selectedPose].description = t.value;
+        
         if (selectedPose < routeJson.poses.length-1)
             selectedPose++
+        t.value = routeJson.poses[selectedPose].description;
+        
         checkArrows();
         arrowLayer.draw()
         updateSkeletonLayerLocations()
@@ -207,6 +212,8 @@ function initCanvas() {
       
     addHorizontalLine.on('click', function () {
         if (addHorizontalLine.opacity() > 0) {
+          var t = document.getElementById("poseDesc");
+          routeJson.poses[selectedPose].description = t.value;
           routeJson.poses.push(JSON.parse(JSON.stringify(routeJson.poses[selectedPose])))
           selectedPose++
           simpleText.text(""+(selectedPose+1)+"/"+routeJson.poses.length)
@@ -229,8 +236,11 @@ function initCanvas() {
         rotation: 330,
       });
       backwardArrow.on('click', function () {
+        var t = document.getElementById("poseDesc");
+        routeJson.poses[selectedPose].description = t.value;
           if (selectedPose > 0)
                 selectedPose--;
+        t.value = routeJson.poses[selectedPose].description;
           simpleText.text(""+(selectedPose+1)+"/"+routeJson.poses.length)
           checkArrows();
           arrowLayer.draw()
