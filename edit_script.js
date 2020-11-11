@@ -90,74 +90,15 @@ let routeJson = {
 let skeletonLayer, bodyGroup, leftLowerLeg, leftUpperLeg, leftAnkleAnchor, leftKneeAnchor, leftHipAnchor, rightLowerLeg, rightUpperLeg, rightAnkleAnchor, rightKneeAnchor, rightHipAnchor, leftForearm, leftUpperArm, leftWristAnchor, leftElbowAnchor, leftShoulderAnchor, rightForearm, rightUpperArm, rightWristAnchor, rightElbowAnchor, rightShoulderAnchor, bodyAnchor; 
 
 function setup() {
-    createCanvas(width, height);
-    img = createImg('data/route.jpg', imageReady);
-    img.size(width, height);
-    img.hide(); // hide the image in the browser
-    frameRate(1); // set the frameRate to 1 since we don't need it to be running quickly in this case
-}
-
-function imageReady() {
-    let options = {
-        imageScaleFactor: 1,
-        minConfidence: 0.1
-    }
-    poseNet = ml5.poseNet(modelReady, options);
-
-    poseNet.on('pose', function (results) {
-        poses = results;
-    });
-}
-
-function modelReady() {
-    select('#status').html('Model Loaded');
-    poseNet.singlePose(img)
-}
-
-function draw() {
-    if (poses.length > 0) {
-        initJson()
-        initCanvas();
-        noLoop();
-    }
+    // Retrieve the JSON string
+    var jsonString = localStorage.getItem("routeJson");
+    
+    // Parse the JSON string back to JS object
+    routeJson = JSON.parse(jsonString);
 }
 
 function calcMaxLength (a, b) {
     return Math.sqrt(Math.pow(a.x-b.x, 2) + (Math.pow(a.y-b.y, 2)))
-}
-
-/** 
- * Initializes the JSON by calculating the limb length limits, and default pose coordinates
- */
-function initJson() {
-    for(pose in defaultPose) {
-        if(pose in poses[selectedPose].pose) {
-            defaultPose[pose] = poses[selectedPose].pose[pose]
-        }
-    }
-
-    routeJson.poses.push(JSON.parse(JSON.stringify(defaultPose)))
-    routeJson.poses.push(JSON.parse(JSON.stringify(defaultPose)))
-
-    // Calculate and assign limb length limits
-    routeJson.stickmanLimits.rightCalf = calcMaxLength(defaultPose.rightAnkle, defaultPose.rightKnee)
-    routeJson.stickmanLimits.rightThigh = calcMaxLength(defaultPose.rightHip, defaultPose.rightKnee)
-    routeJson.stickmanLimits.leftCalf = calcMaxLength(defaultPose.leftAnkle, defaultPose.leftKnee)
-    routeJson.stickmanLimits.leftThigh = calcMaxLength(defaultPose.leftHip, defaultPose.leftKnee)
-    routeJson.stickmanLimits.leftUpperArm = calcMaxLength(defaultPose.leftShoulder, defaultPose.leftElbow)
-    routeJson.stickmanLimits.leftForearm = calcMaxLength(defaultPose.leftElbow, defaultPose.leftWrist)
-    routeJson.stickmanLimits.rightUpperArm = calcMaxLength(defaultPose.rightShoulder, defaultPose.rightElbow)
-    routeJson.stickmanLimits.rightForearm = calcMaxLength(defaultPose.rightElbow, defaultPose.rightWrist)
-
-    // Calculate and assign bodyWidth limit
-    let bodyWidth = (calcMaxLength(defaultPose.leftShoulder, defaultPose.rightShoulder) + calcMaxLength(defaultPose.leftHip, defaultPose.rightHip)) / 2
-    routeJson.stickmanLimits.bodyWidth = bodyWidth
-
-    // Calculate and assign bodyHeight limit
-    let bodyHeight = (calcMaxLength(defaultPose.leftShoulder, defaultPose.leftHip) + calcMaxLength(defaultPose.rightShoulder, defaultPose.rightHip)) / 2
-    routeJson.stickmanLimits.bodyHeight = bodyHeight
-
-    console.log("Finished initializing JSON: ", routeJson)
 }
 
 /**
@@ -190,7 +131,9 @@ function initCanvas() {
     // and the page indicator
     arrowLayer = new Konva.Layer();
     //poseText tells the user what pose they are currently on
-    poseText = new Konva.Text({
+    arrowLayer = new Konva.Layer();
+
+    simpleText = new Konva.Text({
         x: stage.width()-75,
         y: stage.height()-50,
         text:""+(selectedPose+1)+"/"+routeJson.poses.length,
@@ -198,6 +141,28 @@ function initCanvas() {
         fontFamily: 'Sans-serif',
         fill: 'White',
       });
+
+
+    deleteText = new Konva.Text({
+        x: stage.width()-(170 ),
+        y: stage.height()-50,
+        text:"Delete",
+        fontSize: 30,
+        fontFamily: 'Sans-serif',
+        fill: 'Red',
+      });
+      deleteText.on('click', function () {
+          if (routeJson.poses.length > 1) {
+                routeJson.poses = routeJson.poses.filter(item => item !== routeJson.poses[selectedPose])
+              if (selectedPose > 0) {
+                  selectedPose--
+              }
+              checkArrows();
+              updateSkeletonLayerLocations();
+              arrowLayer.draw();
+          }
+      })
+    
     forwardArrow = new Konva.Wedge({
       x: stage.width()-5,
       y: stage.height() / 2,
@@ -208,14 +173,58 @@ function initCanvas() {
       strokeWidth: 4,
       rotation: 150,
     });
+
     forwardArrow.on('click', function () {
+        var t = document.getElementById("poseDesc");
+        routeJson.poses[selectedPose].description = t.value;
+        
         if (selectedPose < routeJson.poses.length-1)
             selectedPose++
-        poseText.text(`${selectedPose + 1}/${routeJson.poses.length}`)
+        t.value = routeJson.poses[selectedPose].description;
+        
         checkArrows();
         arrowLayer.draw()
         updateSkeletonLayerLocations()
     })
+
+
+    addVerticalLine = new Konva.Line({
+        points: [width-50, (height/2)-30, width-50, (height/2)+30],
+        stroke: 'white',
+        strokeWidth: 10,
+      });
+      
+    addVerticalLine.on('click', function () {
+        if (addVerticalLine.opacity() > 0) {
+          routeJson.poses.push(JSON.parse(JSON.stringify(routeJson.poses[selectedPose])))
+          selectedPose++
+          checkArrows();
+          arrowLayer.draw()
+          updateSkeletonLayerLocations()
+        }
+    })
+
+    addHorizontalLine = new Konva.Line({
+        points: [width-20, (height/2), width-80, (height/2)],
+        stroke: 'white',
+        strokeWidth: 10,
+      });
+      
+    addHorizontalLine.on('click', function () {
+        if (addHorizontalLine.opacity() > 0) {
+          var t = document.getElementById("poseDesc");
+          routeJson.poses[selectedPose].description = t.value;
+          routeJson.poses.push(JSON.parse(JSON.stringify(routeJson.poses[selectedPose])))
+          selectedPose++
+          simpleText.text(""+(selectedPose+1)+"/"+routeJson.poses.length)
+          checkArrows();
+          arrowLayer.draw()
+          updateSkeletonLayerLocations()
+    }
+    })
+
+    
+
     backwardArrow = new Konva.Wedge({
         x: 5,
         y: stage.height() / 2,
@@ -226,25 +235,31 @@ function initCanvas() {
         strokeWidth: 4,
         rotation: 330,
       });
-    backwardArrow.on('click', function () {
-        if (selectedPose > 0)
-            selectedPose--;
-        poseText.text(`${selectedPose + 1}/${routeJson.poses.length}`)
-        checkArrows();
-        arrowLayer.draw()
-        updateSkeletonLayerLocations();
-    })
-    checkArrows();
-
+      backwardArrow.on('click', function () {
+        var t = document.getElementById("poseDesc");
+        routeJson.poses[selectedPose].description = t.value;
+          if (selectedPose > 0)
+                selectedPose--;
+        t.value = routeJson.poses[selectedPose].description;
+          simpleText.text(""+(selectedPose+1)+"/"+routeJson.poses.length)
+          checkArrows();
+          arrowLayer.draw()
+          updateSkeletonLayerLocations();
+      })
+      checkArrows();
+    // add the shape to the layer
     arrowLayer.add(forwardArrow);
     arrowLayer.add(backwardArrow);
-    arrowLayer.add(poseText);
-
+    arrowLayer.add(addVerticalLine);
+    arrowLayer.add(addHorizontalLine);
+    arrowLayer.add(simpleText);
+    arrowLayer.add(deleteText);
+    // add the layer to the stage
     stage.add(arrowLayer);
+    
 }
-
-// Checks to see whether or not the forward/previous arrow should be visible.
 function checkArrows () {
+    simpleText.text(""+(selectedPose+1)+"/"+routeJson.poses.length)
     if (selectedPose == 0) {
         backwardArrow.opacity(0.0);
     } else {
@@ -252,8 +267,15 @@ function checkArrows () {
     }
     if (selectedPose == (routeJson.poses.length-1)) {
         forwardArrow.opacity(0.0);
+        forwardArrow.moveToBottom();
+        addVerticalLine.opacity(1.0);
+        addHorizontalLine.opacity(1.0);
     } else {
         forwardArrow.opacity(1.0);
+        addVerticalLine.opacity(0.0);
+        addHorizontalLine.opacity(0.0);
+        addVerticalLine.moveToBottom();
+        addHorizontalLine.moveToBottom();
     }
 }
 
@@ -852,3 +874,7 @@ function makeSkeletonLayer () {
     // Finally, add the entire skeletonLayer to the canvas stage.
     stage.add(skeletonLayer)
 }
+
+
+setup();
+initCanvas();
