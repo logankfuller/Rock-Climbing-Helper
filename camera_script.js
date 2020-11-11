@@ -1,14 +1,17 @@
 let img; let poseNet; let poses = [];
 let selectedPose = 0;
 let poseText;
-let width = 515;
-let height = 720;
+let width = window.innerWidth;
+let height = window.innerHeight-150;
 let nextButton, declineText, acceptText;
 let stage = new Konva.Stage({
     container: 'container',
     width: width,
     height: height,
 });
+let imageSrc = 'data/image1.jpg'
+
+console.log('Width: ', width)
 
 let defaultPose =  {
     "description": "",
@@ -99,7 +102,7 @@ let skeletonLayer, bodyGroup, head, leftLowerLeg, leftUpperLeg, leftAnkleAnchor,
 
 function setup() {
     createCanvas(0, 0);
-    img = createImg('data/route.jpg', imageReady);
+    img = createImg(imageSrc, imageReady);
     img.size(width, height);
     img.hide(); // hide the image in the browser
     frameRate(1); // set the frameRate to 1 since we don't need it to be running quickly in this case
@@ -196,7 +199,7 @@ function initCanvas() {
     
     // Create and add our route image to the canvas
     let imageObj = new Image();
-    imageObj.src = 'data/route.jpg';
+    imageObj.src = imageSrc;
     imageObj.onload = function () {
       let route = new Konva.Image({
         x: 0,
@@ -224,7 +227,7 @@ function initCanvas() {
         fill: 'Green',
         opacity: 0.0
     });
-    acceptText.on('click', function () {
+    acceptText.on('click touchend', function () {
         calcLimits();
         localStorage.setItem("routeJson", JSON.stringify(routeJson));
         window.location.href = "edit_page.html";
@@ -238,7 +241,7 @@ function initCanvas() {
         fill: 'Red',
         opacity: 0.0
     });
-    declineText.on('click', function () {
+    declineText.on('click touchend', function () {
         if (acceptText.opacity != 0.0) {
             nextButton.opacity(1.0)
             declineText.opacity(0.0)
@@ -266,7 +269,7 @@ function initCanvas() {
         fill: '#ffff',
         strokeWidth: 2
     })
-    nextButton.on('click', function() {
+    nextButton.on('click touchend', function() {
         print('a')
         if (nextButton.opacity != 0.0) {
             print('o')
@@ -390,7 +393,7 @@ function makeSkeletonLayer () {
     leftAnkleAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].leftAnkle.x,
         y: routeJson.poses[selectedPose].leftAnkle.y,
-        radius: 10,
+        radius: 1,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -411,7 +414,7 @@ function makeSkeletonLayer () {
     leftKneeAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].leftKnee.x,
         y: routeJson.poses[selectedPose].leftKnee.y,
-        radius: 10,
+        radius: 1,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -439,7 +442,7 @@ function makeSkeletonLayer () {
     leftHipAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].leftHip.x,
         y: routeJson.poses[selectedPose].leftHip.y,
-        radius: 10,
+        radius: 1,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -480,7 +483,7 @@ function makeSkeletonLayer () {
     rightAnkleAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].rightAnkle.x,
         y: routeJson.poses[selectedPose].rightAnkle.y,
-        radius: 10,
+        radius: 1,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -501,7 +504,7 @@ function makeSkeletonLayer () {
     rightKneeAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].rightKnee.x,
         y: routeJson.poses[selectedPose].rightKnee.y,
-        radius: 10,
+        radius: 1,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -529,7 +532,7 @@ function makeSkeletonLayer () {
     rightHipAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].rightHip.x,
         y: routeJson.poses[selectedPose].rightHip.y,
-        radius: 10,
+        radius: 1,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -570,7 +573,7 @@ function makeSkeletonLayer () {
     leftWristAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].leftWrist.x,
         y: routeJson.poses[selectedPose].leftWrist.y,
-        radius: 10,
+        radius: 1,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -591,7 +594,7 @@ function makeSkeletonLayer () {
     leftElbowAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].leftElbow.x,
         y: routeJson.poses[selectedPose].leftElbow.y,
-        radius: 10,
+        radius: 1,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -601,7 +604,7 @@ function makeSkeletonLayer () {
     leftShoulderAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].leftShoulder.x,
         y: routeJson.poses[selectedPose].leftShoulder.y,
-        radius: 10,
+        radius: 1,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -661,7 +664,7 @@ function makeSkeletonLayer () {
     rightWristAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].rightWrist.x,
         y: routeJson.poses[selectedPose].rightWrist.y,
-        radius: 10,
+        radius: 1,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -682,7 +685,7 @@ function makeSkeletonLayer () {
     rightElbowAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].rightElbow.x,
         y: routeJson.poses[selectedPose].rightElbow.y,
-        radius: 10,
+        radius: 1,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -710,7 +713,7 @@ function makeSkeletonLayer () {
     rightShoulderAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].rightShoulder.x,
         y: routeJson.poses[selectedPose].rightShoulder.y,
-        radius: 10,
+        radius: 1,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,

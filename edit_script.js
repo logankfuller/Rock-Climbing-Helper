@@ -1,14 +1,15 @@
 let img; let poseNet; let poses = [];
 let selectedPose = 0;
 let poseText;
-let width = 515;
-let height = 720;
+let width = window.innerWidth;
+let height = window.innerHeight-150;
 let arrowLayer, backwardArrow, forwardArrow, rotationTransformer;
 let stage = new Konva.Stage({
     container: 'container',
     width: width,
     height: height,
 });
+let imageSrc = 'data/image1.jpg'
 
 let defaultPose =  {
     "description": "",
@@ -117,14 +118,14 @@ function initCanvas() {
     
     // Create and add our route image to the canvas
     let imageObj = new Image();
-    imageObj.src = 'data/route.jpg';
+    imageObj.src = imageSrc;
     imageObj.onload = function () {
       let route = new Konva.Image({
         x: 0,
         y: 0,
         image: imageObj,
-        width: 515,
-        height: 720,
+        width: width,
+        height: height,
       });
 
       imageLayer.add(route);
@@ -159,7 +160,7 @@ function initCanvas() {
         fontFamily: 'Sans-serif',
         fill: 'Red',
       });
-      deleteText.on('click', function () {
+      deleteText.on('click touchend', function () {
           if (routeJson.poses.length > 1) {
                 routeJson.poses = routeJson.poses.filter(item => item !== routeJson.poses[selectedPose])
               if (selectedPose > 0) {
@@ -182,7 +183,7 @@ function initCanvas() {
       rotation: 150,
     });
 
-    forwardArrow.on('click', function () {
+    forwardArrow.on('click touchend', function () {
         var t = document.getElementById("poseDesc");
         routeJson.poses[selectedPose].description = t.value;
         
@@ -202,7 +203,7 @@ function initCanvas() {
         strokeWidth: 10,
       });
       
-    addVerticalLine.on('click', function () {
+    addVerticalLine.on('click touchend', function () {
         if (addVerticalLine.opacity() > 0) {
           routeJson.poses.push(JSON.parse(JSON.stringify(routeJson.poses[selectedPose])))
           selectedPose++
@@ -218,7 +219,7 @@ function initCanvas() {
         strokeWidth: 10,
       });
       
-    addHorizontalLine.on('click', function () {
+    addHorizontalLine.on('click touchend', function () {
         if (addHorizontalLine.opacity() > 0) {
           var t = document.getElementById("poseDesc");
           routeJson.poses[selectedPose].description = t.value;
@@ -243,7 +244,7 @@ function initCanvas() {
         strokeWidth: 4,
         rotation: 330,
       });
-      backwardArrow.on('click', function () {
+      backwardArrow.on('click touchend', function () {
         var t = document.getElementById("poseDesc");
         routeJson.poses[selectedPose].description = t.value;
           if (selectedPose > 0)
