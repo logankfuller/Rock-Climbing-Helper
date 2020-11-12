@@ -102,12 +102,14 @@ function setup() {
     createCanvas(0, 0);
     img = createImg(imageSrc, imageReady);
     
-    img.size(width, height);
     img.hide(); // hide the image in the browser
     frameRate(1); // set the frameRate to 1 since we don't need it to be running quickly in this case
 }
 
 function imageReady() {
+    let imageHeightWidth = calculateAspectRatioFit(img.width, img.height, width, height)
+    
+    img.size(imageHeightWidth.width, imageHeightWidth.height);
     let options = {
         imageScaleFactor: 1,
         minConfidence: 0.1
@@ -200,20 +202,23 @@ function initCanvas() {
     let imageObj = new Image();
     imageObj.src = imageSrc;
     imageObj.onload = function () {
+    let imageHeightWidth = calculateAspectRatioFit(imageObj.width, imageObj.height, width, height)
       let route = new Konva.Image({
-        x: 0,
+        x: (width-imageHeightWidth.width)/2,
         y: 0,
         image: imageObj,
-        width: width,
-        height: height,
+        width: imageHeightWidth.width,
+        height: imageHeightWidth.height,
       });
-
+      routeJson.poses[selectedPose].body.x += (width-imageHeightWidth.width)/2
+      defaultPose.body.x = routeJson.poses[selectedPose].body.x
+      updateSkeletonLayerLocations()
+      
       imageLayer.add(route);
       imageLayer.batchDraw();
     };
     
     stage.add(imageLayer)
-
     makeSkeletonLayer()
 
     let controlLayer = new Konva.Layer();
@@ -270,10 +275,7 @@ function initCanvas() {
         strokeWidth: 2
     })
     nextButton.on('click touchend', function() {
-        print('a')
-        
         if (nextButton.opacity != 0.0) {
-            print('o')
             nextButton.opacity(0.0)
             declineText.opacity(1.0)
             acceptText.opacity(1.0)
@@ -809,6 +811,7 @@ function makeSkeletonLayer () {
 
     skeletonLayer.add(bodyGroup)
 
+    
     leftUpperArm.moveToBottom()
     leftForearm.moveToBottom()
     leftUpperLeg.moveToBottom()
@@ -823,3 +826,11 @@ function makeSkeletonLayer () {
 
     stage.add(skeletonLayer)
 }
+
+// https://stackoverflow.com/questions/3971841/how-to-resize-images-proportionally-keeping-the-aspect-ratio
+function calculateAspectRatioFit(srcWidth, srcHeight, maxWidth, maxHeight) {
+
+    var ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
+
+    return { width: srcWidth*ratio, height: srcHeight*ratio };
+ }

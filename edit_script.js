@@ -128,13 +128,14 @@ function initCanvas() {
     let imageObj = new Image();
     imageObj.src = imageSrc;
     imageObj.onload = function () {
-      let route = new Konva.Image({
-        x: 0,
-        y: 0,
-        image: imageObj,
-        width: width,
-        height: height,
-      });
+        let imageHeightWidth = calculateAspectRatioFit(imageObj.width, imageObj.height, width, height)
+        let route = new Konva.Image({
+          x: (width-imageHeightWidth.width)/2,
+          y: 0,
+          image: imageObj,
+          width: imageHeightWidth.width,
+          height: imageHeightWidth.height,
+        });
 
       imageLayer.add(route);
       imageLayer.batchDraw();
@@ -888,6 +889,8 @@ function makeSkeletonLayer () {
         routeJson.poses[selectedPose].body.y = bodyGroup.y()
     })
 
+    bodyGroup.x(routeJson.poses[selectedPose].body.x)
+    bodyGroup.y(routeJson.poses[selectedPose].body.ya)
     // Move the non-anchor lines to the bottom, so that the anchors appear on top.
     leftUpperArm.moveToBottom()
     leftForearm.moveToBottom()
@@ -905,5 +908,16 @@ function makeSkeletonLayer () {
     stage.add(skeletonLayer)
 
 }
+
+
+// https://stackoverflow.com/questions/3971841/how-to-resize-images-proportionally-keeping-the-aspect-ratio
+function calculateAspectRatioFit(srcWidth, srcHeight, maxWidth, maxHeight) {
+
+    var ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
+
+    return { width: srcWidth*ratio, height: srcHeight*ratio };
+ }
+
 initJson();
 initCanvas();
+
