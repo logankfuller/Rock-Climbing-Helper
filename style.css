@@ -69,9 +69,68 @@ p {
     width: auto;
     height: auto;
 }
+#saveButton {
+    color: white;
+    font-family: sans-serif;
+    font-size: 24;
+    margin-left: auto;
+    margin-right: 30px;
+    text-decoration: none;
+}
 body {
     margin: 0;
     padding: 0;
     /* overflow: hidden; */
     background-color: #f0f0f0;
+}
+.row {
+    display: flex;
+    align-content: center;
+    flex-direction: row;
+    width: 100%;
+}
+.column {
+    display: flex;
+    align-content: center;
+    flex-direction: column;
+    width: 75%;
+}
+.column:first-of-type {
+    width: 25%;
+}
+#formContainer {
+    margin: 10px;
+    width: 100%;
+}
+.inputTitle {
+    color: black;
+    margin-left: auto;
+    height: 40px;
+}
+.inputItem {
+    height: 40px;
+    font-size:20px; 
+    margin: 5px;
+    margin-top: 15px;
+    margin-bottom: 25px;
+    width: 80%;
+    border:10px;
+    resize:none;
+}
+#descriptionItem {
+    height: 200px;
+    font-size:20px; 
+    margin-left: 15%;
+    margin-right: 10%;
+    margin-bottom: 30px;
+    width: 75%;
+    border:10px;
+    resize:none;
+}
+#finalSaveButton {
+    color: green;
+    font-family: sans-serif;
+    font-size: 24;
+    margin-left: 80%;
+    text-decoration: none;
 }

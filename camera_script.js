@@ -101,6 +101,7 @@ let skeletonLayer, bodyGroup, head, leftLowerLeg, leftUpperLeg, leftAnkleAnchor,
 function setup() {
     createCanvas(0, 0);
     img = createImg(imageSrc, imageReady);
+    
     img.size(width, height);
     img.hide(); // hide the image in the browser
     frameRate(1); // set the frameRate to 1 since we don't need it to be running quickly in this case
@@ -248,6 +249,7 @@ function initCanvas() {
             updateSkeletonLayerLocations()
             setDraggable(false)
             controlLayer.draw()
+            document.getElementById('message').innerHTML = "Please begin by taking a picture of yourself next to the route.";
         }
       }) 
     let backSquare = new Konva.Rect({
@@ -278,6 +280,7 @@ function initCanvas() {
             setDraggable(true)
             bodyGroup.draggable(false)
             controlLayer.draw()
+            document.getElementById('message').innerHTML = "Is this picture ok? Adjust the stickman if the dimensions are not correct.";
         }
     })
     controlLayer.add(backSquare)

@@ -1,0 +1,48 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Climbingo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="topBar"><a id='backButton' href="edit_page.html">←</a><p id='status'>Save Route</p></div>
+    <div id="formContainer">
+        <div class="row">
+        <div class="column"> 
+            <p class="inputTitle">Title</p>
+            <p class="inputTitle">Grade</p> 
+            <p class="inputTitle">Location</p> 
+            <p class="inputTitle">Public</p>
+            <p class="inputTitle">Description</p>
+        </div>
+        <div class="column"> 
+            <textarea class="inputItem" placeholder="Name" ></textarea>
+            <textarea class="inputItem" placeholder="Grade"></textarea>
+            <textarea class="inputItem" placeholder="Location"></textarea>
+            <input type="checkbox" class="inputItem"></input>
+        </div>
+    </div>
+    <textarea id="descriptionItem" placeholder="Description" ></textarea>
+    <a id="finalSaveButton" href="/camera_page.html">SAVE</a>
+    </div>
+    <div class="bottomBar"> 
+        <div class="bottomItem">
+            <img class="selectedImg" src="/data/camera.png"></img>
+            <p class="selectedText">New Route</p></div> 
+        <div class="bottomItem">
+            <img class="unselectedImg" src="/data/folder.png"></img>
+            <p>My Routes</p></div>  
+        <div class="bottomItem">
+            <img class="unselectedImg" src="/data/spyglass.png"></img>
+            <p>Browse</p></div> 
+        <div class="bottomItem">
+            <img class="unselectedImg" src="/data/profile.png"></img>
+            <p>My Profile</p></div> 
+    </div>
+   
+</body>
+
+</html>
