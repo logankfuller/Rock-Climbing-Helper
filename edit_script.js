@@ -409,7 +409,7 @@ function makeSkeletonLayer () {
     leftHipAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].leftHip.x,
         y: routeJson.poses[selectedPose].leftHip.y,
-        radius: 10,
+        radius: 5,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -418,7 +418,7 @@ function makeSkeletonLayer () {
     leftKneeAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].leftKnee.x,
         y: routeJson.poses[selectedPose].leftKnee.y,
-        radius: 10,
+        radius: 5,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -459,7 +459,7 @@ function makeSkeletonLayer () {
     leftAnkleAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].leftAnkle.x,
         y: routeJson.poses[selectedPose].leftAnkle.y,
-        radius: 10,
+        radius: 5,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -508,7 +508,7 @@ function makeSkeletonLayer () {
     rightHipAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].rightHip.x,
         y: routeJson.poses[selectedPose].rightHip.y,
-        radius: 10,
+        radius: 5,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -517,7 +517,7 @@ function makeSkeletonLayer () {
     rightKneeAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].rightKnee.x,
         y: routeJson.poses[selectedPose].rightKnee.y,
-        radius: 10,
+        radius: 5,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -558,7 +558,7 @@ function makeSkeletonLayer () {
     rightAnkleAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].rightAnkle.x,
         y: routeJson.poses[selectedPose].rightAnkle.y,
-        radius: 10,
+        radius: 5,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -608,7 +608,7 @@ function makeSkeletonLayer () {
     leftShoulderAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].leftShoulder.x,
         y: routeJson.poses[selectedPose].leftShoulder.y,
-        radius: 10,
+        radius: 5,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -617,7 +617,7 @@ function makeSkeletonLayer () {
     leftElbowAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].leftElbow.x,
         y: routeJson.poses[selectedPose].leftElbow.y,
-        radius: 10,
+        radius: 5,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -658,7 +658,7 @@ function makeSkeletonLayer () {
     leftWristAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].leftWrist.x,
         y: routeJson.poses[selectedPose].leftWrist.y,
-        radius: 10,
+        radius: 5,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -708,7 +708,7 @@ function makeSkeletonLayer () {
     rightShoulderAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].rightShoulder.x,
         y: routeJson.poses[selectedPose].rightShoulder.y,
-        radius: 10,
+        radius: 5,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -717,7 +717,7 @@ function makeSkeletonLayer () {
     rightElbowAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].rightElbow.x,
         y: routeJson.poses[selectedPose].rightElbow.y,
-        radius: 10,
+        radius: 5,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -758,7 +758,7 @@ function makeSkeletonLayer () {
     rightWristAnchor = new Konva.Circle({
         x: routeJson.poses[selectedPose].rightWrist.x,
         y: routeJson.poses[selectedPose].rightWrist.y,
-        radius: 10,
+        radius: 5,
         stroke: '#666',
         fill: '#ddd',
         strokeWidth: 2,
@@ -823,10 +823,12 @@ function makeSkeletonLayer () {
         opacity: 0.5
     })
 
+    const bodyWidth = Math.abs(routeJson.poses[selectedPose].leftShoulder.x - routeJson.poses[selectedPose].rightShoulder.x)
+
     head = new Konva.Circle({
         x: (leftShoulderAnchor.x() + rightShoulderAnchor.x()) / 2,
         y: routeJson.poses[selectedPose].nose.y,
-        radius: 20,
+        radius: bodyWidth / 2,
         fill: 'black',
         opacity: 0.5
     })
