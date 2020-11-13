@@ -9,7 +9,13 @@ let stage = new Konva.Stage({
     width: width,
     height: height,
 });
-let imageSrc = 'data/image1.jpg'
+let imageSrc
+try {
+    imageSrc = localStorage.getItem('capturedImage')
+} catch (error) {
+    console.log(error)
+}
+
 
 let defaultPose =  {
     "description": "",

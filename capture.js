@@ -4,6 +4,8 @@ function readURL() {
 
         reader.onload = function (e) {
             document.getElementById('blah').src =  e.target.result;
+            localStorage.setItem('capturedImage', e.target.result)
+            window.location.href = "edit_page.html"
         }
 
         reader.readAsDataURL(this.files[0]);

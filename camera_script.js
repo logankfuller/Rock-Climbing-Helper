@@ -4,8 +4,20 @@ let poseText;
 let width = window.innerWidth;
 let height = window.innerHeight - 150;
 let nextButton, declineText, acceptText;
+let stage
+let canvasContainer = document.getElementById("container");
+let buttonContainer = document.getElementById("buttonContainer");
+let controlLayer
 
-let imageSrc = 'data/image4.jpg'
+// Immediately hide the container holding the canvas which we will show later
+canvasContainer.style.display = "none";
+
+let imageSrc
+try {
+    imageSrc = localStorage.getItem('capturedImage')
+} catch (error) {
+    console.log(error)
+}
 
 let defaultPose = {
     "description": "",
@@ -96,9 +108,6 @@ let skeletonLayer, bodyGroup, head, leftLowerLeg, leftUpperLeg, leftAnkleAnchor,
 
 function setup() {
     createCanvas(0, 0);
-    img = createImg(imageSrc, imageReady);
-
-    img.hide(); // hide the image in the browser
     frameRate(1); // set the frameRate to 1 since we don't need it to be running quickly in this case
 }
 
@@ -124,8 +133,16 @@ function modelReady() {
 function draw() {
     if (poses.length > 0) {
         initJson()
-        //initCanvas();
+        initCanvas();
         noLoop();
+
+        declineText.opacity(1.0)
+        acceptText.opacity(1.0)
+        setDraggable(true)
+        bodyGroup.draggable(false)
+        controlLayer.draw()
+        document.getElementById('message').innerHTML = "Is this picture ok? Adjust the stickman if the dimensions are not correct.";
+
     }
 }
 
@@ -217,7 +234,7 @@ function initCanvas() {
     stage.add(imageLayer)
     makeSkeletonLayer()
 
-    let controlLayer = new Konva.Layer();
+    controlLayer = new Konva.Layer();
     acceptText = new Konva.Text({
         x: (width / 2) + 100,
         y: stage.height() - 60,
@@ -243,7 +260,6 @@ function initCanvas() {
     });
     declineText.on('click touchend', function () {
         if (acceptText.opacity != 0.0) {
-            nextButton.opacity(1.0)
             declineText.opacity(0.0)
             acceptText.opacity(0.0)
             routeJson.poses[selectedPose] = JSON.parse(JSON.stringify(defaultPose))
@@ -251,6 +267,8 @@ function initCanvas() {
             setDraggable(false)
             controlLayer.draw()
             document.getElementById('message').innerHTML = "Please begin by taking a picture of yourself next to the route.";
+            buttonContainer.style.display = "flex"
+            canvasContainer.style.display = "none"
         }
     })
     let backSquare = new Konva.Rect({
@@ -262,27 +280,27 @@ function initCanvas() {
         opacity: 0.5,
         strokeWidth: 4
     });
-    nextButton = new Konva.Circle({
-        x: width / 2,
-        y: height - 50,
-        radius: 25,
-        stroke: '#ffff',
-        fill: '#ffff',
-        strokeWidth: 2
-    })
-    nextButton.on('click touchend', function () {
-        if (nextButton.opacity != 0.0) {
-            nextButton.opacity(0.0)
-            declineText.opacity(1.0)
-            acceptText.opacity(1.0)
-            setDraggable(true)
-            bodyGroup.draggable(false)
-            controlLayer.draw()
-            document.getElementById('message').innerHTML = "Is this picture ok? Adjust the stickman if the dimensions are not correct.";
-        }
-    })
+    // nextButton = new Konva.Circle({
+    //     x: width / 2,
+    //     y: height - 50,
+    //     radius: 25,
+    //     stroke: '#ffff',
+    //     fill: '#ffff',
+    //     strokeWidth: 2
+    // })
+    // nextButton.on('click touchend', function () {
+    //     if (nextButton.opacity != 0.0) {
+    //         nextButton.opacity(0.0)
+    //         declineText.opacity(1.0)
+    //         acceptText.opacity(1.0)
+    //         setDraggable(true)
+    //         bodyGroup.draggable(false)
+    //         controlLayer.draw()
+    //         document.getElementById('message').innerHTML = "Is this picture ok? Adjust the stickman if the dimensions are not correct.";
+    //     }
+    // })
     controlLayer.add(backSquare)
-    controlLayer.add(nextButton)
+    // controlLayer.add(nextButton)
     controlLayer.add(declineText)
     controlLayer.add(acceptText)
 
@@ -830,3 +848,30 @@ function calculateAspectRatioFit(srcWidth, srcHeight, maxWidth, maxHeight) {
 
     return { width: srcWidth * ratio, height: srcHeight * ratio };
 }
+
+
+function readURL() {
+    if (this.files && this.files[0]) {
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            localStorage.setItem('capturedImage', e.target.result)
+
+            stage = new Konva.Stage({
+                container: 'container',
+                width: width,
+                height: height,
+            });
+
+            img = createImg(imageSrc, imageReady);
+            img.hide(); // hide the image in the browser
+
+            buttonContainer.style.display = "none"
+            canvasContainer.style.display = "block"
+        }
+
+        reader.readAsDataURL(this.files[0]);
+    }
+}
+const input = document.getElementById('uploadImage')
+input.addEventListener('change', readURL)
