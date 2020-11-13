@@ -12,24 +12,39 @@
 </head>
 
 <body>
-    <div class="topBar"><p id='exclaimation'>!</p><p id='message'>Please begin by taking a picture of yourself next to the route.</p></div>
-    <div id="container"></div>
+    <div id="captureContainer">
+        <div class="topBar">
+            <p id='exclaimation'>!</p>
+            <p id='message'>Please begin by taking a picture of yourself next to the route.</p>
+        </div>
+
+        <div id="buttonContainer">
+            <label for="uploadImage" class="imageUpload">Capture/Upload Picture</label>
+            <input type="file" id="uploadImage" />    
+        </div>
+
+        <div class="bottomBar">
+            <div class="bottomItem">
+                <img class="selectedImg" src="/data/camera.png"></img>
+                <p class="selectedText">New Route</p>
+            </div>
+            <div class="bottomItem">
+                <img class="unselectedImg" src="/data/folder.png"></img>
+                <p>My Routes</p>
+            </div>
+            <div class="bottomItem">
+                <img class="unselectedImg" src="/data/spyglass.png"></img>
+                <p>Browse</p>
+            </div>
+            <div class="bottomItem">
+                <img class="unselectedImg" src="/data/profile.png"></img>
+                <p>My Profile</p>
+            </div>
+        </div>
+    </div>
+
     <script src="camera_script.js"></script>
     <script src="fabric.min.js"></script>
-    <div class="bottomBar"> 
-        <div class="bottomItem">
-            <img class="selectedImg" src="/data/camera.png"></img>
-            <p class="selectedText">New Route</p></div> 
-        <div class="bottomItem">
-            <img class="unselectedImg" src="/data/folder.png"></img>
-            <p>My Routes</p></div>  
-        <div class="bottomItem">
-            <img class="unselectedImg" src="/data/spyglass.png"></img>
-            <p>Browse</p></div> 
-        <div class="bottomItem">
-            <img class="unselectedImg" src="/data/profile.png"></img>
-            <p>My Profile</p></div> 
-    </div>
 </body>
 
 </html>

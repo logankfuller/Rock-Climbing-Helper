@@ -5,7 +5,7 @@ let width = window.innerWidth;
 let height = window.innerHeight-150;
 let arrowLayer, backwardArrow, forwardArrow, rotationTransformer;
 let stage = new Konva.Stage({
-    container: 'container',
+    container: 'buttonContainer',
     width: width,
     height: height,
 });
