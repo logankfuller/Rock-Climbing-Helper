@@ -9,15 +9,14 @@ let canvasContainer = document.getElementById("container");
 let buttonContainer = document.getElementById("buttonContainer");
 let controlLayer
 
+// Clear localStorage so that we're not working with previously saved data
+// This would eventually be replaced by a database
+localStorage.clear()
+
 // Immediately hide the container holding the canvas which we will show later
 canvasContainer.style.display = "none";
 
 let imageSrc
-try {
-    imageSrc = localStorage.getItem('capturedImage')
-} catch (error) {
-    console.log(error)
-}
 
 let defaultPose = {
     "description": "",
@@ -856,6 +855,12 @@ function readURL() {
 
         reader.onload = function (e) {
             localStorage.setItem('capturedImage', e.target.result)
+
+            try {
+                imageSrc = localStorage.getItem('capturedImage')
+            } catch (error) {
+                console.log(error)
+            }
 
             stage = new Konva.Stage({
                 container: 'container',
