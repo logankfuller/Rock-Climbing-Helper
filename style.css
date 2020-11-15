@@ -105,6 +105,9 @@ body {
     width: 100%;
 }
 
+.row:first-of-type {
+    margin-top: 30px;
+}
 .column {
     display: flex;
     align-content: center;
@@ -121,17 +124,19 @@ body {
 }
 
 .inputTitle {
-    color: black;
+    color: #888888;
     margin-left: auto;
-    height: 40px;
+    font-size: 20px;
+    font-weight: 600;
 }
 
 .inputItem {
-    height: 40px;
+    
+    height: 30px;
     font-size: 20px;
     margin: 5px;
     margin-top: 15px;
-    margin-bottom: 25px;
+    margin-left: 15px;
     width: 80%;
     border: 10px;
     resize: none;
