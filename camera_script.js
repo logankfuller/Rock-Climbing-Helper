@@ -205,15 +205,7 @@ function initCanvas() {
     });
     declineText.on('click touchend', function () {
         if (acceptText.opacity != 0.0) {
-            declineText.opacity(0.0)
-            acceptText.opacity(0.0)
-            routeJson.poses[selectedPose] = JSON.parse(JSON.stringify(defaultPose))
-            updateSkeletonLayerLocations()
-            setDraggable(false)
-            controlLayer.draw()
-            document.getElementById('message').innerHTML = "Please begin by taking a picture of yourself next to the route.";
-            buttonContainer.style.display = "none"
-            canvasContainer.style.display = "none"
+            window.location.href = "camera_page.html";
         }
     })
     let backSquare = new Konva.Rect({
