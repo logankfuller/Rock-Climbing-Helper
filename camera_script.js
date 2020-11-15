@@ -1,16 +1,19 @@
 
 let nextButton, declineText, acceptText;
 let stage
+let loadingMessage = document.getElementById("loading");
 let canvasContainer = document.getElementById("container");
 let buttonContainer = document.getElementById("buttonContainer");
 let controlLayer
+let uploading = false
 
 // Clear localStorage so that we're not working with previously saved data
 // This would eventually be replaced by a database
 localStorage.clear()
 
 // Immediately hide the container holding the canvas which we will show later
-canvasContainer.style.display = "none";
+canvasContainer.style.display = "none"
+loadingMessage.style.display = "none"
 
 
 
@@ -176,7 +179,7 @@ function initCanvas() {
             setDraggable(false)
             controlLayer.draw()
             document.getElementById('message').innerHTML = "Please begin by taking a picture of yourself next to the route.";
-            buttonContainer.style.display = "flex"
+            buttonContainer.style.display = "none"
             canvasContainer.style.display = "none"
         }
     })
@@ -201,12 +204,14 @@ function initCanvas() {
 
 
 function readURL() {
+    loadingMessage.style.display = "flex"
+    console.log(loadingMessage.style.display)
     if (this.files && this.files[0]) {
+
         var reader = new FileReader();
 
         reader.onload = function (e) {
             localStorage.setItem('capturedImage', e.target.result)
-
             try {
                 imageSrc = localStorage.getItem('capturedImage')
             } catch (error) {
@@ -223,7 +228,7 @@ function readURL() {
             img.hide(); // hide the image in the browser
 
             buttonContainer.style.display = "none"
-            canvasContainer.style.display = "block"
+            canvasContainer.style.display = "none"
         }
 
         reader.readAsDataURL(this.files[0]);
