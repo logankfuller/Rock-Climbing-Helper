@@ -1,17 +1,60 @@
-let arrowLayer, backwardArrow, forwardArrow, rotationTransformer, addButton;
+let arrowLayer, backwardArrow, forwardArrow, rotationTransformer, addButton, saveButton;
 let stage = new Konva.Stage({
   container: 'buttonContainer',
   width: width,
   height: height,
 });
 
-function setup() {
-  createCanvas(0, 0);
-  img = createImg(imageSrc);
-  img.size(width, height);
-  img.hide(); // hide the image in the browser
-  frameRate(1);
+saveButton = document.getElementById('saveButton')
+saveButton.addEventListener('click', function() {
+  localStorage.setItem("routeJson", JSON.stringify(routeJson))
+})
+
+if (!window.indexedDB) {
+  alert("IndexedDB is not supported. This app WILL NOT work with this browser.")
 }
+
+let request = window.indexedDB.open("ImageDB", 1),
+  db,
+  tx,
+  store
+
+request.onupgradeneeded = function (e) {
+  let db = request.result,
+    store = db.createObjectStore("ImageStore", {
+      keyPath: "key"
+    })
+}
+
+request.onerror = function (e) {
+  console.log("There was an error: " + e.target.errorCode)
+}
+
+request.onsuccess = function (e) {
+  db = request.result
+
+  tx = db.transaction("ImageStore", "readwrite")
+  store = tx.objectStore("ImageStore")
+  dbImagePromise = store.get(1)
+  dbImagePromise.onsuccess = function () {
+    imageSrc = dbImagePromise.result.image
+
+    initJson();
+    initCanvas();
+  }
+
+  db.onerror = function (e) {
+    console.log("ERROR" + e.target.errorCode)
+  }
+}
+
+// function setup() {
+//   createCanvas(0, 0);
+//   img = createImg(imageSrc);
+//   img.size(width, height);
+//   img.hide(); // hide the image in the browser
+//   frameRate(1);
+// }
 
 function calcMaxLength(a, b) {
   return Math.sqrt(Math.pow(a.x - b.x, 2) + (Math.pow(a.y - b.y, 2)))
@@ -135,37 +178,11 @@ function initCanvas() {
     strokeWidth: 10,
   });
 
-  addVerticalLine.on('click touchend', function () {
-    if (addVerticalLine.opacity() > 0) {
-      var t = document.getElementById("poseDesc");
-      routeJson.poses[selectedPose].description = t.value;
-      routeJson.poses.push(JSON.parse(JSON.stringify(routeJson.poses[selectedPose])))
-      selectedPose++
-      simpleText.text("" + (selectedPose + 1) + "/" + routeJson.poses.length)
-      checkArrows();
-      arrowLayer.draw()
-      updateSkeletonLayerLocations()
-    }
-  })
-
   addHorizontalLine = new Konva.Line({
     points: [width - 20, (height / 2), width - 80, (height / 2)],
     stroke: 'black',
     strokeWidth: 10,
   });
-
-  addHorizontalLine.on('click touchend', function () {
-    if (addHorizontalLine.opacity() > 0) {
-      var t = document.getElementById("poseDesc");
-      routeJson.poses[selectedPose].description = t.value;
-      routeJson.poses.push(JSON.parse(JSON.stringify(routeJson.poses[selectedPose])))
-      selectedPose++
-      simpleText.text("" + (selectedPose + 1) + "/" + routeJson.poses.length)
-      checkArrows();
-      arrowLayer.draw()
-      updateSkeletonLayerLocations()
-    }
-  })
 
   addButton.add(addHorizontalLine)
   addButton.add(addVerticalLine)
@@ -178,6 +195,19 @@ function initCanvas() {
       addVerticalLine.stroke("black")
       arrowLayer.draw()
     }, 250)
+  })
+
+  addButton.on('mouseup touchend', function() {
+    if (addButton.opacity() > 0) {
+      var t = document.getElementById("poseDesc");
+      routeJson.poses[selectedPose].description = t.value;
+      routeJson.poses.push(JSON.parse(JSON.stringify(routeJson.poses[selectedPose])))
+      selectedPose++
+      simpleText.text("" + (selectedPose + 1) + "/" + routeJson.poses.length)
+      checkArrows();
+      arrowLayer.draw()
+      updateSkeletonLayerLocations()
+    }
   })
 
   backwardArrow = new Konva.Wedge({
@@ -246,6 +276,3 @@ function checkArrows() {
     addButton.moveToBottom();
   }
 }
-
-initJson();
-initCanvas();

@@ -1,4 +1,3 @@
-
 let nextButton, declineText, acceptText;
 let stage
 let loadingMessage = document.getElementById("loading");
@@ -7,9 +6,41 @@ let buttonContainer = document.getElementById("buttonContainer");
 let controlLayer
 let uploading = false
 
-// Clear localStorage so that we're not working with previously saved data
-// This would eventually be replaced by a database
-localStorage.clear()
+// // Clear localStorage so that we're not working with previously saved data
+// // This would eventually be replaced by a database
+// localStorage.clear()
+
+// I just want to state that I have to do this the hard way because 
+// stupid phone cameras keep needing 512 MP cameras so that people
+// can share dumb photos.
+
+if(!window.indexedDB) {
+    alert("IndexedDB is not supported. This app WILL NOT work with this browser.")
+}
+
+let request = window.indexedDB.open("ImageDB", 1),
+    db,
+    tx,
+    store
+
+request.onupgradeneeded = function(e) {
+    let db = request.result,
+        store = db.createObjectStore("ImageStore", {
+            keyPath: "key"
+        })
+}
+
+request.onerror = function(e) {
+    console.log("There was an error: " + e.target.errorCode)
+}
+
+request.onsuccess = function(e) {
+    db = request.result
+
+    db.onerror = function(e) {
+        console.log("ERROR" + e.target.errorCode)
+    }
+}
 
 // Immediately hide the container holding the canvas which we will show later
 canvasContainer.style.display = "none"
@@ -207,30 +238,43 @@ function initCanvas() {
 
 function readURL() {
     loadingMessage.style.display = "flex"
-    console.log(loadingMessage.style.display)
+
     if (this.files && this.files[0]) {
 
         var reader = new FileReader();
 
         reader.onload = function (e) {
-            localStorage.setItem('capturedImage', e.target.result)
+            tx = db.transaction("ImageStore", "readwrite")
+            store = tx.objectStore("ImageStore")
+            store.put({key: 1, image: e.target.result})
+            //localStorage.setItem('capturedImage', e.target.result)
             try {
-                imageSrc = localStorage.getItem('capturedImage')
+                // imageSrc = localStorage.getItem('capturedImage')
+                dbImagePromise = store.get(1)
+                dbImagePromise.onsuccess = function() {
+                    imageSrc = dbImagePromise.result.image
+                    
+                    stage = new Konva.Stage({
+                        container: 'container',
+                        width: width,
+                        height: height,
+                    });
+        
+                    tx.oncomplete = function() {
+                        db.close()
+                    }
+        
+                    img = createImg(imageSrc, imageReady);
+                    img.hide(); // hide the image in the browser
+        
+                    buttonContainer.style.display = "none"
+                    canvasContainer.style.display = "none"
+                }
             } catch (error) {
                 console.log(error)
             }
 
-            stage = new Konva.Stage({
-                container: 'container',
-                width: width,
-                height: height,
-            });
-
-            img = createImg(imageSrc, imageReady);
-            img.hide(); // hide the image in the browser
-
-            buttonContainer.style.display = "none"
-            canvasContainer.style.display = "none"
+            
         }
 
         reader.readAsDataURL(this.files[0]);
