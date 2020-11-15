@@ -145,6 +145,8 @@ function initCanvas() {
     stage.add(imageLayer)
     editMode = false;
     makeSkeletonLayer()
+    loadingMessage.style.display = "none"
+    canvasContainer.style.display = "flex"
 
     controlLayer = new Konva.Layer();
     acceptText = new Konva.Text({
